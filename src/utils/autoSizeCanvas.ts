@@ -8,5 +8,7 @@ import {realSize} from '@utils/realSize';
 export const autoSizeCanvas = (canvas: HTMLCanvasElement): (() => void) => {
     const resize = () => Object.assign(canvas, realSize(canvas));
     window.addEventListener('resize', resize);
+    resize();
+
     return () => window.removeEventListener('resize', resize);
 };
