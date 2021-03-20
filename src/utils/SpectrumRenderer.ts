@@ -20,7 +20,7 @@ for (let i = 0; i <= 255; i++) {
 
     // Towards the end it should just get dark
     const lightness = hue > HUE_SILENCING ?
-        0.5 - 0.5 * ((300 - hue) / (HUE_MAX - HUE_SILENCING))
+        0.5 * ((300 - hue) / (HUE_MAX - HUE_SILENCING))
         : 0.5;
 
     color.set(hslToRgb(hue / 360, 1, lightness), 0);
@@ -28,22 +28,22 @@ for (let i = 0; i <= 255; i++) {
 }
 
 export class SpectrumRenderer {
-    private audio?: AudioBuffer;
+    public static readonly COLORS = colors;
 
-    constructor(
-        private options: RenderSpectrumOptions,
-        private file?: Blob
-    ) {
-    }
+    private audio?: AudioBuffer;
+    private options?: RenderSpectrumOptions;
+    private file?: Blob;
 
     /**
      * Renders an audio spectrum to a canvas.
      * @param file
      * @param opt
      */
-    public async render(file: Blob | undefined = this.file, opt: RenderSpectrumOptions = this.options): Promise<HTMLCanvasElement> {
+    public async render(file: Blob | undefined = this.file, opt: RenderSpectrumOptions | undefined = this.options): Promise<HTMLCanvasElement> {
         if (!file && !this.file) {
             throw new Error(`Input missing`);
+        } else if (!opt) {
+            throw new Error(`Config missing`);
         }
 
         this.file = file;
@@ -81,6 +81,7 @@ export class SpectrumRenderer {
         const width = frames.length;
         const height = frames[0].length;
         const imageData = new ImageData(width, height);
+        const colors = SpectrumRenderer.COLORS;
 
         for (let x = 0; x < width; x++) {
             const frame = frames[x];
