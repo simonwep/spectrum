@@ -49,7 +49,7 @@ export class SpectrumRenderer {
         this.file = file;
         this.options = opt;
 
-        if (this.file && !this.audio) {
+        if (this.file && (!this.audio || file !== this.file)) {
             this.audio = await createAudioBuffer((file ?? this.file) as Blob, this.options.audioContextOptions);
         }
 
