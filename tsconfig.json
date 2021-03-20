@@ -8,6 +8,7 @@
         "outDir": "./types",
         "rootDir": "./src",
         "strict": true,
+        "target": "ESNext",
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "noImplicitReturns": true,
@@ -15,7 +16,11 @@
         "moduleResolution": "node",
         "allowSyntheticDefaultImports": true,
         "experimentalDecorators": true,
-        "forceConsistentCasingInFileNames": true
+        "forceConsistentCasingInFileNames": true,
+        "baseUrl": ".",
+        "paths": {
+            "@utils/*": ["./src/utils/*"]
+        }
     },
     "include": ["src/**/*.ts"]
 }
