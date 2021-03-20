@@ -1,12 +1,13 @@
 import {autoSizeCanvas} from '@utils/autoSizeCanvas';
-import {renderSpectrum} from '@utils/renderSpectrum';
 import {on} from '@utils/events';
+import {renderSpectrum} from '@utils/renderSpectrum';
 import './styles/_index.scss';
 
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 autoSizeCanvas(canvas);
 
 const render = async (file: Blob) => {
+    const start = performance.now();
     const spectrum = await renderSpectrum(file, {
         width: canvas.width,
         height: canvas.height
@@ -15,7 +16,7 @@ const render = async (file: Blob) => {
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
     ctx.drawImage(spectrum, 0, 0, canvas.width, canvas.height);
     ctx.translate(0.5, 0.5);
-    console.log('done');
+    console.log(`Done, took ${Math.floor(performance.now() - start)}ms`);
 };
 
 on('#app', ['dragover', 'drop'], (evt: DragEvent) => {
@@ -26,7 +27,6 @@ on('#app', ['dragover', 'drop'], (evt: DragEvent) => {
         file && render(file);
     }
 });
-
 
 fetch('/ad.mp3')
     .then(res => res.blob())

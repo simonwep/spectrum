@@ -32,9 +32,8 @@ export const renderFrames = async (opt: FrameOptions): Promise<Uint8Array[]> => 
     for (let i = 0; i < opt.frames; i++) {
         const frame = i * frameSize;
         context.suspend(frame).then(() => {
-            const buffer = frames[i] = new Uint8Array(bufferSize);
-            analyzer.getByteFrequencyData(buffer);
-            return context.resume();
+            context.resume();
+            analyzer.getByteFrequencyData(frames[i] = new Uint8Array(bufferSize));
         });
     }
 

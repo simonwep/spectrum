@@ -1,4 +1,5 @@
 import {createAudioBuffer} from '@utils/createAudioBuffer';
+import {hslToRgb} from '@utils/hslToRgb';
 import {renderFrames} from '@utils/renderFrames';
 
 export interface RenderSpectrumOptions {
@@ -7,6 +8,23 @@ export interface RenderSpectrumOptions {
     minDecibels?: number;
     maxDecibels?: number;
     audioContextOptions?: AudioContextOptions;
+}
+
+// Pre-calculate colors to copy into the bitmap
+const HUE_SILENCING = 270;
+const HUE_MAX = 300;
+const colors: Uint8ClampedArray[] = new Array(256);
+for (let i = 0; i <= 255; i++) {
+    const color = colors[255 - i] = new Uint8ClampedArray(4);
+    const hue = (i / 255) * HUE_MAX;
+
+    // Towards the end it should just get dark
+    const lightness = hue > HUE_SILENCING ?
+        0.5 - 0.5 * ((300 - hue) / (HUE_MAX - HUE_SILENCING))
+        : 0.5;
+
+    color.set(hslToRgb(hue / 360, 1, lightness), 0);
+    color[3] = 255;
 }
 
 /**
@@ -41,18 +59,20 @@ export const renderSpectrum = async (file: Blob, opt: RenderSpectrumOptions): Pr
 
     // Render spectrum
     const width = frames.length;
-    const height = fftSize / 2;
+    const height = frames[0].length;
     const imageData = new ImageData(width, height);
-    for (let i = 0; i < frames.length; i++) {
-        const frame = frames[i];
 
-        for (let j = 0; j < frame.length; j++) {
-            const loudness = frame[j] / 255;
-            const pixelOffset = (i + (frame.length - j) * width) * 4;
-            imageData.data[pixelOffset] = 255;
-            imageData.data[pixelOffset + 1] = 255;
-            imageData.data[pixelOffset + 2] = 255;
-            imageData.data[pixelOffset + 3] = loudness * 255;
+    for (let x = 0; x < width; x++) {
+        const frame = frames[x];
+
+        for (let y = 0; y < height; y++) {
+            const loudness = frame[y];
+
+            if (loudness) {
+                const pixelOffset = (x + (height - y - 1) * width) * 4;
+                const color = colors[loudness];
+                imageData.data.set(color, pixelOffset);
+            }
         }
     }
 
