@@ -134,7 +134,7 @@ const renderGraph = async () => {
         ctx.resetTransform();
 
         // Render spectrum
-        const spectrum = await renderer.render();
+        const spectrum = await renderer.render({width, height});
         const [t, r, b, l] = GRAPH_MARGIN;
         ctx.drawImage(spectrum, l, t, width - r - l, height - t - b);
         ctx.translate(0.5, 0.5);

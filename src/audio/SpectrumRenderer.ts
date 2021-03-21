@@ -1,5 +1,5 @@
-import {createAudioBuffer} from './createAudioBuffer';
 import {hslToRgb} from '@utils/hslToRgb';
+import {createAudioBuffer} from './createAudioBuffer';
 import {renderFrames} from './renderFrames';
 
 export interface RenderSpectrumOptions {
@@ -42,16 +42,20 @@ export class SpectrumRenderer {
      * Renders an audio spectrum to a canvas.
      * @param opt
      */
-    public async render(opt: RenderSpectrumOptions | undefined = this.options): Promise<HTMLCanvasElement> {
+    public async render(opt?: RenderSpectrumOptions): Promise<HTMLCanvasElement> {
         if (!opt) {
             throw new Error(`Config missing.`);
         }
 
-        if (!this.audio || (opt && opt !== this.options)) {
+        if (!this.audio || (opt && opt.audioContextOptions !== this.options?.audioContextOptions)) {
             this.audio = await createAudioBuffer(this.file as Blob, opt.audioContextOptions);
         }
 
-        this.options = opt;
+        this.options = {
+            ...opt,
+            ...this.options
+        };
+
 
         // Find next higher number with the power of two to fit the screen height
         let fftSize = 2;
@@ -62,7 +66,7 @@ export class SpectrumRenderer {
         // Analyze file
         const audioBuffer = this.audio as AudioBuffer;
         const frames = await renderFrames({
-            frames: opt.width,
+            frames: this.options.width,
             buffer: audioBuffer,
             contextOptions: {
                 numberOfChannels: audioBuffer.numberOfChannels,
@@ -71,8 +75,8 @@ export class SpectrumRenderer {
             },
             analyzerOptions: {
                 fftSize,
-                minDecibels: opt.minDecibels ?? -120,
-                maxDecibels: opt.maxDecibels ?? -20
+                minDecibels: this.options.minDecibels ?? -120,
+                maxDecibels: this.options.maxDecibels ?? -20
             }
         });
 
