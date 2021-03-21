@@ -57,13 +57,15 @@ export class SpectrumRenderer {
         if (
             this.canvas && this.options && (!opt || (
                 opt.height <= this.options.height &&
-                opt.width <= this.options.width
+                opt.width <= this.options.width &&
+                opt.minDecibels === this.options.minDecibels &&
+                opt.maxDecibels === this.options.maxDecibels
             ))
         ) return this.canvas;
 
         this.options = {
-            ...opt,
-            ...this.options
+            ...this.options,
+            ...opt
         };
 
         // Find next higher number with the power of two to fit the screen height
@@ -114,8 +116,9 @@ export class SpectrumRenderer {
         canvas.width = width;
         canvas.height = height;
 
-        (canvas.getContext('2d') as CanvasRenderingContext2D)
-            .putImageData(imageData, 0, 0);
+        (canvas.getContext('2d', {
+            alpha: false
+        }) as CanvasRenderingContext2D).putImageData(imageData, 0, 0);
 
         return canvas;
     }

@@ -111,7 +111,7 @@ export const renderSkeleton = (opt: RenderSkeletonOptions): void => {
             const infoText = `${name} (${type}, ${sampleRate} Hz, ${numberOfChannels} channels)`;
             context.textAlign = 'left';
             context.textBaseline = 'bottom';
-            context.font = '16px monospace';
+            context.font = '14px monospace';
             context.fillText(infoText, l, t - 8);
         }
     }
