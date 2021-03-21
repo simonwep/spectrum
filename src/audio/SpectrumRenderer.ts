@@ -30,11 +30,11 @@ for (let i = 0; i <= 255; i++) {
 export class SpectrumRenderer {
     public static readonly COLORS = colors;
 
-    private audio?: AudioBuffer;
+    public audio?: AudioBuffer;
 
     constructor(
-        private file: Blob,
-        private options?: RenderSpectrumOptions
+        public file: File,
+        public options?: RenderSpectrumOptions
     ) {
     }
 
@@ -48,6 +48,7 @@ export class SpectrumRenderer {
         }
 
         if (!this.audio || (opt && opt !== this.options)) {
+            console.log('re-render');
             this.audio = await createAudioBuffer(this.file as Blob, opt.audioContextOptions);
         }
 

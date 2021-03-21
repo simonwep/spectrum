@@ -1,6 +1,7 @@
 import {SpectrumRenderer} from '@audio/SpectrumRenderer';
 import {on} from '@utils/events';
 import {findFittingTicksAmount} from '@utils/geometric';
+import {prettyDuration} from '@utils/prettyDuration';
 import {realSize} from '@utils/realSize';
 import {debounce} from 'debounce';
 import './styles/_index.scss';
@@ -13,21 +14,22 @@ const MIN_DECIBELS = -120;
 const MAX_DECIBELS = -20;
 
 // Visual options
-const GRAPH_MARGIN = [75, 100, 35, 75];
+const GRAPH_MARGIN = [75, 100, 35, 65];
 const DECIBEL_BAR_WIDTH = 10;
 const TICK_MIN_DISTANCE = 50;
 const TICK_THICKNESS = 1;
 const TICK_LENGTH = 10;
 
-let renderer: SpectrumRenderer;
+let renderer: SpectrumRenderer | undefined;
 let {width, height} = canvas;
 
-const renderUI = async () => {
-    ctx.resetTransform();
-
-    // Resize canvas
+const resize = () => {
     ({width, height} = realSize(canvas));
     Object.assign(canvas, {width, height});
+};
+
+const renderUI = () => {
+    ctx.resetTransform();
 
     const [t, r, b, l] = GRAPH_MARGIN;
     const boxHeight = height - t - b;
@@ -57,8 +59,7 @@ const renderUI = async () => {
         ctx.fillRect(x0, y0, DECIBEL_BAR_WIDTH, boxHeight);
 
         // Draw ticks for decimal bar
-        const ticks = findFittingTicksAmount(TICK_MIN_DISTANCE, boxHeight);
-        const spacing = boxHeight / ticks;
+        const [ticks, spacing] = findFittingTicksAmount(TICK_MIN_DISTANCE, boxHeight);
         for (let i = 0; i <= ticks; i++) {
             const y = y0 + (i * spacing);
             const text = `${Math.floor(((i / ticks) * (MIN_DECIBELS - MAX_DECIBELS)) + MAX_DECIBELS)} dB`;
@@ -75,22 +76,59 @@ const renderUI = async () => {
             ctx.fillText(text, x1 + TICK_LENGTH + 2, y + 1);
         }
     }
+
+    // Renderere dependent information
+    if (renderer?.audio) {
+        const {sampleRate, duration} = renderer.audio;
+
+        // Draw kHz ticks
+        {
+            ctx.fillStyle = 'white';
+            const outerBoxHeight = boxHeight + 1;
+            const [ticks, spacing] = findFittingTicksAmount(TICK_MIN_DISTANCE, outerBoxHeight);
+            const spectrum = sampleRate / 2 / 1000;
+            for (let i = 0; i <= ticks; i++) {
+                const y = t + (i * spacing) - 1;
+                const text = `${Math.floor(((ticks - i) / ticks) * spectrum)} kHz`;
+
+                // Tick
+                ctx.fillRect(l - TICK_LENGTH, y, TICK_LENGTH, TICK_THICKNESS);
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'middle';
+                ctx.font = '12px monospace';
+                ctx.fillText(text, l - TICK_LENGTH - 2, y + 1);
+            }
+        }
+
+        // Draw duration ticks
+        {
+            const outerBoxWidth = boxWidth + 1;
+            const [ticks, spacing] = findFittingTicksAmount(TICK_MIN_DISTANCE * 2, outerBoxWidth);
+            for (let i = 0; i <= ticks; i++) {
+                const x = l + (i * spacing) - 1;
+                const text = prettyDuration(Math.floor((i / ticks) * duration));
+
+                // Tick
+                ctx.fillRect(x, t + boxHeight, TICK_THICKNESS, TICK_LENGTH);
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'hanging';
+                ctx.font = '12px monospace';
+                ctx.fillText(text, x, t + boxHeight + TICK_LENGTH + 2);
+            }
+        }
+    }
 };
 
 const renderGraph = async () => {
-    ctx.resetTransform();
+    if (renderer) {
+        ctx.resetTransform();
 
-    // Render spectrum
-    const spectrum = await renderer.render({
-        width,
-        height,
-        maxDecibels: MAX_DECIBELS,
-        minDecibels: MIN_DECIBELS
-    });
-
-    const [t, r, b, l] = GRAPH_MARGIN;
-    ctx.drawImage(spectrum, l, t, width - r - l, height - t - b);
-    ctx.translate(0.5, 0.5);
+        // Render spectrum
+        const spectrum = await renderer.render();
+        const [t, r, b, l] = GRAPH_MARGIN;
+        ctx.drawImage(spectrum, l, t, width - r - l, height - t - b);
+        ctx.translate(0.5, 0.5);
+    }
 };
 
 on('#app', ['dragover', 'drop'], (evt: DragEvent) => {
@@ -99,11 +137,23 @@ on('#app', ['dragover', 'drop'], (evt: DragEvent) => {
     if (evt.type === 'drop') {
         const file = evt.dataTransfer?.files?.[0];
         if (file) {
-            renderer = new SpectrumRenderer(file);
+            renderer = new SpectrumRenderer(file, {
+                width,
+                height,
+                maxDecibels: MAX_DECIBELS,
+                minDecibels: MIN_DECIBELS
+            });
+
             renderGraph().then(renderUI);
         }
     }
 });
 
 window.addEventListener('resize', debounce(renderGraph, 250));
-window.addEventListener('resize', renderUI);
+window.addEventListener('resize', () => {
+    resize();
+    renderUI();
+});
+
+resize();
+renderUI();
