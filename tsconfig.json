@@ -11,6 +11,7 @@
         "target": "ESNext",
         "noUnusedLocals": true,
         "noUnusedParameters": true,
+        "resolveJsonModule": true,
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
         "moduleResolution": "node",
