@@ -14,7 +14,7 @@ const MIN_DECIBELS = -120;
 const MAX_DECIBELS = -20;
 
 // Visual options
-const GRAPH_MARGIN = [75, 100, 35, 65];
+const GRAPH_MARGIN = [35, 100, 35, 65];
 const DECIBEL_BAR_WIDTH = 10;
 const TICK_MIN_DISTANCE = 50;
 const TICK_THICKNESS = 1;
@@ -79,7 +79,7 @@ const renderUI = () => {
 
     // Renderere dependent information
     if (renderer?.audio) {
-        const {sampleRate, duration} = renderer.audio;
+        const {sampleRate, duration, numberOfChannels} = renderer.audio;
 
         // Draw kHz ticks
         {
@@ -115,6 +115,16 @@ const renderUI = () => {
                 ctx.font = '12px monospace';
                 ctx.fillText(text, x, t + boxHeight + TICK_LENGTH + 2);
             }
+        }
+
+        // Draw info text
+        {
+            const {name, type} = renderer.file;
+            const infoText = `${name} (${type}, ${sampleRate} Hz, ${numberOfChannels} channels)`;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'bottom';
+            ctx.font = '16px monospace';
+            ctx.fillText(infoText, l, t - 8);
         }
     }
 };

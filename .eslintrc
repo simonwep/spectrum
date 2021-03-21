@@ -16,8 +16,5 @@
         "project": "./tsconfig.json",
         "sourceType": "module",
         "ecmaVersion": 2018
-    },
-    "rules": {
-        "@typescript-eslint/no-non-null-assertion": "off"
     }
 }

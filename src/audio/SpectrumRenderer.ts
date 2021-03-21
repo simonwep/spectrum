@@ -48,7 +48,6 @@ export class SpectrumRenderer {
         }
 
         if (!this.audio || (opt && opt !== this.options)) {
-            console.log('re-render');
             this.audio = await createAudioBuffer(this.file as Blob, opt.audioContextOptions);
         }
 
