@@ -27,7 +27,7 @@ const config = {
 
     // Visual options
     visuals: {
-        graphMargin: [35, 100, 35, 65],
+        graphMargin: [40, 100, 35, 65],
         decibelBarWidth: 10,
         tickMinDistance: 50,
         tickThickness: 1,

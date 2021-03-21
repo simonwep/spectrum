@@ -22,6 +22,15 @@ export const renderSkeleton = (opt: RenderSkeletonOptions): void => {
     const boxHeight = height - t - b;
     const boxWidth = width - r - l;
 
+    // Draw version
+    {
+        context.fillStyle = 'white';
+        context.textAlign = 'end';
+        context.textBaseline = 'hanging';
+        context.font = '12px monospace';
+        context.fillText(`v${env.VERSION}`, width - 10, 10);
+    }
+
     // Draw graph box
     {
         context.strokeStyle = 'white';
@@ -75,15 +84,17 @@ export const renderSkeleton = (opt: RenderSkeletonOptions): void => {
             const outerBoxHeight = boxHeight + 1;
             const [ticks, spacing] = findFittingTicksAmount(visuals.tickMinDistance, outerBoxHeight);
             const spectrum = sampleRate / 2 / 1000;
+
+            context.textAlign = 'right';
+            context.textBaseline = 'middle';
+            context.font = '12px monospace';
+
             for (let i = 0; i <= ticks; i++) {
                 const y = t + (i * spacing) - 1;
                 const text = `${Math.floor(((ticks - i) / ticks) * spectrum)} kHz`;
 
                 // Tick
                 context.fillRect(l - visuals.tickLength, y, visuals.tickLength, visuals.tickThickness);
-                context.textAlign = 'right';
-                context.textBaseline = 'middle';
-                context.font = '12px monospace';
                 context.fillText(text, l - visuals.tickLength - 2, y + 1);
             }
         }
@@ -92,15 +103,17 @@ export const renderSkeleton = (opt: RenderSkeletonOptions): void => {
         {
             const outerBoxWidth = boxWidth + 1;
             const [ticks, spacing] = findFittingTicksAmount(visuals.tickMinDistance * 2, outerBoxWidth);
+
+            context.textAlign = 'center';
+            context.textBaseline = 'hanging';
+            context.font = '12px monospace';
+
             for (let i = 0; i <= ticks; i++) {
                 const x = l + (i * spacing) - 1;
                 const text = prettyDuration(Math.floor((i / ticks) * duration));
 
                 // Tick
                 context.fillRect(x, t + boxHeight, visuals.tickThickness, visuals.tickLength);
-                context.textAlign = 'center';
-                context.textBaseline = 'hanging';
-                context.font = '12px monospace';
                 context.fillText(text, x, t + boxHeight + visuals.tickLength + 2);
             }
         }
