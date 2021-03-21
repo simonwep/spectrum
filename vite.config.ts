@@ -12,7 +12,8 @@ export default defineConfig({
     resolve: {
         alias: {
             '@utils': resolve('./src/utils'),
-            '@audio': resolve('./src/audio')
+            '@audio': resolve('./src/audio'),
+            '@renderer': resolve('./src/renderer')
         }
     },
 

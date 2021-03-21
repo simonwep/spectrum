@@ -21,7 +21,8 @@
         "baseUrl": ".",
         "paths": {
             "@utils/*": ["./src/utils/*"],
-            "@audio/*": ["./src/audio/*"]
+            "@audio/*": ["./src/audio/*"],
+            "@renderer/*": ["./src/renderer/*"]
         }
     },
     "include": ["src/**/*.ts"]

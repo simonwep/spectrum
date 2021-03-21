@@ -30,6 +30,7 @@ for (let i = 0; i <= 255; i++) {
 export class SpectrumRenderer {
     public static readonly COLORS = colors;
 
+    public canvas?: HTMLCanvasElement;
     public audio?: AudioBuffer;
 
     constructor(
@@ -40,6 +41,7 @@ export class SpectrumRenderer {
 
     /**
      * Renders an audio spectrum to a canvas.
+     * If the previously rendered spectrum is smaller it'll be down-scaled.
      * @param opt
      */
     public async render(opt?: RenderSpectrumOptions): Promise<HTMLCanvasElement> {
@@ -51,11 +53,18 @@ export class SpectrumRenderer {
             this.audio = await createAudioBuffer(this.file as Blob, opt.audioContextOptions);
         }
 
+        // Check if the amount of details needeed has increased
+        if (
+            this.canvas && this.options && (!opt || (
+                opt.height <= this.options.height &&
+                opt.width <= this.options.width
+            ))
+        ) return this.canvas;
+
         this.options = {
             ...opt,
             ...this.options
         };
-
 
         // Find next higher number with the power of two to fit the screen height
         let fftSize = 2;
@@ -101,7 +110,7 @@ export class SpectrumRenderer {
         }
 
         // Put on canvas
-        const canvas = document.createElement('canvas');
+        const canvas = this.canvas = document.createElement('canvas');
         canvas.width = width;
         canvas.height = height;
 
