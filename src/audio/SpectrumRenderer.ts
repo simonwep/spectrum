@@ -1,6 +1,6 @@
-import {createAudioBuffer} from '@utils/createAudioBuffer';
+import {createAudioBuffer} from './createAudioBuffer';
 import {hslToRgb} from '@utils/hslToRgb';
-import {renderFrames} from '@utils/renderFrames';
+import {renderFrames} from './renderFrames';
 
 export interface RenderSpectrumOptions {
     width: number;
@@ -31,39 +31,38 @@ export class SpectrumRenderer {
     public static readonly COLORS = colors;
 
     private audio?: AudioBuffer;
-    private options?: RenderSpectrumOptions;
-    private file?: Blob;
+
+    constructor(
+        private file: Blob,
+        private options?: RenderSpectrumOptions
+    ) {
+    }
 
     /**
      * Renders an audio spectrum to a canvas.
-     * @param file
      * @param opt
      */
-    public async render(file: Blob | undefined = this.file, opt: RenderSpectrumOptions | undefined = this.options): Promise<HTMLCanvasElement> {
-        if (!file && !this.file) {
-            throw new Error(`Input missing`);
-        } else if (!opt) {
-            throw new Error(`Config missing`);
+    public async render(opt: RenderSpectrumOptions | undefined = this.options): Promise<HTMLCanvasElement> {
+        if (!opt) {
+            throw new Error(`Config missing.`);
         }
 
-        this.file = file;
+        if (!this.audio || (opt && opt !== this.options)) {
+            this.audio = await createAudioBuffer(this.file as Blob, opt.audioContextOptions);
+        }
+
         this.options = opt;
-
-        if (this.file && (!this.audio || file !== this.file)) {
-            this.audio = await createAudioBuffer((file ?? this.file) as Blob, this.options.audioContextOptions);
-        }
-
 
         // Find next higher number with the power of two to fit the screen height
         let fftSize = 2;
-        while ((fftSize / 2) < this.options.height) {
+        while ((fftSize / 2) < opt.height) {
             fftSize *= 2;
         }
 
         // Analyze file
         const audioBuffer = this.audio as AudioBuffer;
         const frames = await renderFrames({
-            frames: this.options.width,
+            frames: opt.width,
             buffer: audioBuffer,
             contextOptions: {
                 numberOfChannels: audioBuffer.numberOfChannels,
@@ -72,8 +71,8 @@ export class SpectrumRenderer {
             },
             analyzerOptions: {
                 fftSize,
-                minDecibels: this.options.minDecibels ?? -120,
-                maxDecibels: this.options.maxDecibels ?? -20
+                minDecibels: opt.minDecibels ?? -120,
+                maxDecibels: opt.maxDecibels ?? -20
             }
         });
 

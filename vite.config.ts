@@ -8,7 +8,8 @@ export default defineConfig({
 
     resolve: {
         alias: {
-            '@utils': resolve('./src/utils')
+            '@utils': resolve('./src/utils'),
+            '@audio': resolve('./src/audio')
         }
     }
 });

@@ -19,7 +19,8 @@
         "forceConsistentCasingInFileNames": true,
         "baseUrl": ".",
         "paths": {
-            "@utils/*": ["./src/utils/*"]
+            "@utils/*": ["./src/utils/*"],
+            "@audio/*": ["./src/audio/*"]
         }
     },
     "include": ["src/**/*.ts"]
