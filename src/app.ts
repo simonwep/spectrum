@@ -82,8 +82,16 @@ const toggleHelpScreen = () => document.getElementById('help')?.classList.toggle
 on('#canvas', ['dragover', 'drop'], (evt: DragEvent) => {
     evt.preventDefault();
 
+    if (!evt.dataTransfer) {
+        return;
+    }
+
+    // Show copy icon for this data-transfer
+    evt.dataTransfer.dropEffect = 'copy';
+
+    // React to when a file is dropped
     if (evt.type === 'drop') {
-        const file = evt.dataTransfer?.files?.[0];
+        const file = evt.dataTransfer.files?.[0];
 
         if (file) {
             resetApp();
