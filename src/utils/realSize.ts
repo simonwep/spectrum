@@ -9,9 +9,11 @@ interface Size {
  * @param ratio
  */
 export const realSize = (
-    el: Element,
+    el: HTMLCanvasElement,
     ratio = devicePixelRatio
 ): Size => {
+    el.width = 0;
+    el.height = 0;
     const rect = el.getBoundingClientRect();
 
     // See https://stackoverflow.com/a/35244519/7664765

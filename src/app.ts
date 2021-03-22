@@ -52,7 +52,9 @@ const resetApp = () => {
 };
 
 const resizeCanvas = () => {
-    Object.assign(canvas, realSize(canvas));
+    const {width, height} = realSize(canvas);
+    canvas.width = width;
+    canvas.height = height;
     drawUserInterface();
 };
 
@@ -74,8 +76,10 @@ const redraw = (): void => {
     void drawUserInterface();
 };
 
+const toggleHelpScreen = () => document.getElementById('help')?.classList.toggle('visible');
+
 // Wait for files
-on('#app', ['dragover', 'drop'], (evt: DragEvent) => {
+on('#canvas', ['dragover', 'drop'], (evt: DragEvent) => {
     evt.preventDefault();
 
     if (evt.type === 'drop') {
@@ -102,8 +106,9 @@ on(window, 'keydown', (evt: KeyboardEvent) => {
         evt.preventDefault();
 
         switch (evt.code) {
-            case 'KeyS':
+            case 'KeyS': {
                 return downloadSpectrum(evt.shiftKey);
+            }
             case 'ArrowUp': {
                 config.analyzer[evt.shiftKey ? 'minDecibels' : 'maxDecibels'] += 1;
                 return redraw();
@@ -113,12 +118,28 @@ on(window, 'keydown', (evt: KeyboardEvent) => {
                 return redraw();
             }
         }
+    } else {
+        switch (evt.code) {
+            case 'KeyF': {
+                document.getElementById('header')?.classList.toggle('visible');
+                resizeCanvas();
+                return drawSpectrumThrotteled();
+            }
+            case 'KeyH': {
+                toggleHelpScreen();
+                return;
+            }
+        }
     }
 });
 
 // React to browser changes
 window.addEventListener('resize', drawSpectrumThrotteled);
 window.addEventListener('resize', resizeCanvas);
+
+// Buttons
+document.getElementById('help-screen-btn')?.addEventListener('click', toggleHelpScreen);
+document.getElementById('help')?.addEventListener('click', toggleHelpScreen);
 
 // Initial resize and draw
 resizeCanvas();
