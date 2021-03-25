@@ -19,8 +19,5 @@
         "vite": "^2.1.0",
         "vite-plugin-html": "^2.0.3",
         "vite-plugin-pwa": "^0.5.6"
-    },
-    "dependencies": {
-        "debounce": "^1.2.1"
     }
 }

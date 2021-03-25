@@ -1,10 +1,10 @@
 import {SpectrumRenderer} from '@audio/SpectrumRenderer';
-import {renderSkeleton} from '@renderer/renderSkeleton';
-import {renderSpectrum} from '@renderer/renderSpectrum';
+import {drawSkeleton} from '@renderer/drawSkeleton';
+import {drawSpectrum, renderSpectrum} from '@renderer/renderSpectrum';
 import {downloadBlob} from '@utils/downloadBlob';
 import {on} from '@utils/events';
 import {realSize} from '@utils/realSize';
-import {debounce} from 'debounce';
+import {throttlePromise} from '@utils/throttlePromise';
 import './styles/_index.scss';
 
 // Canvas, context and spectrum renderer
@@ -36,28 +36,31 @@ const config = {
 };
 
 // Main functions
-const drawUserInterface = () =>
-    renderSkeleton({renderer, context, config});
+const startRendering = throttlePromise(async () => {
+    if (renderer) {
+        await renderSpectrum({renderer, context, config});
+        redraw();
+    }
+}, 500);
 
-const drawSpectrum = async () => renderer &&
-    renderSpectrum({renderer, context, config});
+const redraw = () => {
 
-const drawSpectrumThrotteled = debounce(drawSpectrum, 250);
-
-const resetApp = () => {
-    renderer = undefined;
-    context.fillStyle = 'black';
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    drawUserInterface();
-};
-
-const resizeCanvas = () => {
+    // Resize (and clear canvas by this)
     const {width, height} = realSize(canvas);
     canvas.width = width;
     canvas.height = height;
-    drawUserInterface();
+
+    // Draw UI skeleton
+    drawSkeleton({renderer, context, config});
+
+    // Draw current spectrum
+    renderer && drawSpectrum({renderer, context, config});
+
+    // Start next render cycle
+    startRendering();
 };
 
+const toggleHelpScreen = () => document.getElementById('help')?.classList.toggle('visible');
 const downloadSpectrum = (spectrumOnly?: boolean) => {
     if (renderer?.canvas) {
         const filename = renderer.file.name
@@ -69,14 +72,6 @@ const downloadSpectrum = (spectrumOnly?: boolean) => {
         }, 'image/png');
     }
 };
-
-const redraw = (): void => {
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    void drawSpectrumThrotteled();
-    void drawUserInterface();
-};
-
-const toggleHelpScreen = () => document.getElementById('help')?.classList.toggle('visible');
 
 // Wait for files
 on('#canvas', ['dragover', 'drop'], (evt: DragEvent) => {
@@ -94,7 +89,8 @@ on('#canvas', ['dragover', 'drop'], (evt: DragEvent) => {
         const file = evt.dataTransfer.files?.[0];
 
         if (file) {
-            resetApp();
+            renderer = undefined;
+            redraw();
 
             renderer = new SpectrumRenderer(file, {
                 width: screen.availWidth,
@@ -103,7 +99,7 @@ on('#canvas', ['dragover', 'drop'], (evt: DragEvent) => {
                 minDecibels: config.analyzer.minDecibels
             });
 
-            drawSpectrum().then(drawUserInterface);
+            redraw();
         }
     }
 });
@@ -130,24 +126,22 @@ on(window, 'keydown', (evt: KeyboardEvent) => {
         switch (evt.code) {
             case 'KeyF': {
                 document.getElementById('header')?.classList.toggle('visible');
-                resizeCanvas();
-                return drawSpectrumThrotteled();
+                return redraw();
             }
             case 'KeyH': {
-                toggleHelpScreen();
-                return;
+                return toggleHelpScreen();
             }
         }
     }
 });
 
 // React to browser changes
-window.addEventListener('resize', drawSpectrumThrotteled);
-window.addEventListener('resize', resizeCanvas);
+window.addEventListener('resize', redraw);
+document.addEventListener('fullscreenchange', redraw);
 
 // Buttons
 document.getElementById('help-screen-btn')?.addEventListener('click', toggleHelpScreen);
 document.getElementById('help')?.addEventListener('click', toggleHelpScreen);
 
-// Initial resize and draw
-resizeCanvas();
+// Initialize
+redraw();

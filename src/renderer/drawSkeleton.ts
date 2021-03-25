@@ -13,7 +13,7 @@ interface RenderSkeletonOptions {
  * Renders the ui skeleton
  * @param opt
  */
-export const renderSkeleton = (opt: RenderSkeletonOptions): void => {
+export const drawSkeleton = (opt: RenderSkeletonOptions): void => {
     const {context, renderer, config: {visuals, analyzer}} = opt;
     context.resetTransform();
 

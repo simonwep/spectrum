@@ -30,6 +30,7 @@ for (let i = 0; i <= 255; i++) {
 export class SpectrumRenderer {
     public static readonly COLORS = colors;
 
+    public isRendering = false;
     public canvas?: HTMLCanvasElement;
     public audio?: AudioBuffer;
 
@@ -40,15 +41,30 @@ export class SpectrumRenderer {
     }
 
     /**
+     * Returns the previously rendered spectrum.
+     */
+    public getSpectrum(): HTMLCanvasElement | null {
+        return this.canvas ?? null;
+    }
+
+    /**
      * Renders an audio spectrum to a canvas.
      * If the previously rendered spectrum is smaller it'll be down-scaled.
      * @param opt
      */
-    public async render(opt?: RenderSpectrumOptions): Promise<HTMLCanvasElement> {
+    public async startRender(opt?: RenderSpectrumOptions): Promise<void> {
+
+        // Rendering already in progress
+        if (this.isRendering) {
+            return;
+        }
+
+        // Configuration missing?
         if (!opt) {
             throw new Error(`Config missing.`);
         }
 
+        // Analyze audio if not already done so
         if (!this.audio || (opt && opt.audioContextOptions !== this.options?.audioContextOptions)) {
             this.audio = await createAudioBuffer(this.file as Blob, opt.audioContextOptions);
         }
@@ -61,7 +77,7 @@ export class SpectrumRenderer {
                 opt.minDecibels === this.options.minDecibels &&
                 opt.maxDecibels === this.options.maxDecibels
             ))
-        ) return this.canvas;
+        ) return;
 
         this.options = {
             ...this.options,
@@ -75,6 +91,7 @@ export class SpectrumRenderer {
         }
 
         // Analyze file
+        this.isRendering = true;
         const audioBuffer = this.audio as AudioBuffer;
         const frames = await renderFrames({
             frames: this.options.width,
@@ -120,6 +137,6 @@ export class SpectrumRenderer {
             alpha: false
         }) as CanvasRenderingContext2D).putImageData(imageData, 0, 0);
 
-        return canvas;
+        this.isRendering = false;
     }
 }
