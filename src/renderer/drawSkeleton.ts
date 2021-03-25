@@ -1,7 +1,7 @@
 import {SpectrumRenderer} from '@audio/SpectrumRenderer';
 import {findFittingTicksAmount} from '@utils/geometric';
 import {prettyDuration} from '@utils/prettyDuration';
-import {Configuration} from '../app';
+import {Configuration} from '../setup';
 
 interface RenderSkeletonOptions {
     renderer?: SpectrumRenderer;

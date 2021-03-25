@@ -1,5 +1,5 @@
 import {SpectrumRenderer} from '@audio/SpectrumRenderer';
-import {Configuration} from '../app';
+import {Configuration} from '../setup';
 
 interface RenderSpectrumOptions {
     renderer: SpectrumRenderer;
