@@ -22,20 +22,18 @@ export const renderSkeleton = (opt: RenderSkeletonOptions): void => {
     const boxHeight = height - t - b;
     const boxWidth = width - r - l;
 
+    // Base styles
+    context.fillStyle = 'white';
+    context.strokeStyle = 'white';
+    context.font = '12px monospace';
+
     // Draw version
-    {
-        context.fillStyle = 'white';
-        context.textAlign = 'end';
-        context.textBaseline = 'hanging';
-        context.font = '12px monospace';
-        context.fillText(`v${env.VERSION}`, width - 10, 10);
-    }
+    context.textAlign = 'end';
+    context.textBaseline = 'hanging';
+    context.fillText(`v${env.VERSION}`, width - 10, 10);
 
     // Draw graph box
-    {
-        context.strokeStyle = 'white';
-        context.strokeRect(l - 0.5, t - 0.5, boxWidth + 1, boxHeight + 1);
-    }
+    context.strokeRect(l - 0.5, t - 0.5, boxWidth + 1, boxHeight + 1);
 
     // Draw decibel bar
     {
@@ -53,6 +51,8 @@ export const renderSkeleton = (opt: RenderSkeletonOptions): void => {
 
         context.fillStyle = decibelGradient;
         context.fillRect(x0, y0, visuals.decibelBarWidth, boxHeight);
+        context.textAlign = 'left';
+        context.textBaseline = 'middle';
 
         // Draw ticks for decimal bar
         const [ticks, spacing] = findFittingTicksAmount(visuals.tickMinDistance, boxHeight);
@@ -67,9 +67,6 @@ export const renderSkeleton = (opt: RenderSkeletonOptions): void => {
 
             // Text
             context.fillStyle = 'white';
-            context.textAlign = 'left';
-            context.textBaseline = 'middle';
-            context.font = '12px monospace';
             context.fillText(text, x1 + visuals.tickLength + 2, y + 1);
         }
     }
@@ -80,14 +77,12 @@ export const renderSkeleton = (opt: RenderSkeletonOptions): void => {
 
         // Draw kHz ticks
         {
-            context.fillStyle = 'white';
             const outerBoxHeight = boxHeight + 1;
             const [ticks, spacing] = findFittingTicksAmount(visuals.tickMinDistance, outerBoxHeight);
             const spectrum = sampleRate / 2 / 1000;
 
             context.textAlign = 'right';
             context.textBaseline = 'middle';
-            context.font = '12px monospace';
 
             for (let i = 0; i <= ticks; i++) {
                 const y = t + (i * spacing) - 1;
