@@ -1,7 +1,7 @@
 {
     "name": "Audio Spectrum Analyzer",
     "short_name": "ASA",
-    "start_url": "/",
+    "start_url": "./",
     "display": "standalone",
     "orientation": "portrait",
     "background_color": "#000",

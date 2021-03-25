@@ -10,6 +10,7 @@ export default defineConfig({
         target: 'esnext'
     },
 
+    base: '',
     define: {
         'env.VERSION': JSON.stringify(pkg.version)
     },
@@ -25,6 +26,9 @@ export default defineConfig({
     plugins: [
         minifyHtml(),
         VitePWA({
+            registerType: 'autoUpdate',
+            strategies: 'generateSW',
+            base: './',
             manifest
         })
     ]
