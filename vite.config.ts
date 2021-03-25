@@ -2,7 +2,7 @@ import {resolve} from 'path';
 import {defineConfig} from 'vite';
 import {minifyHtml} from 'vite-plugin-html';
 import {VitePWA} from 'vite-plugin-pwa';
-import manifest from './src/manifest.json';
+import manifest from './manifest.json';
 import pkg from './package.json';
 
 export default defineConfig({
