@@ -30,16 +30,17 @@ export const drawSpectrum = (opt: RenderSpectrumOptions): void => {
  * @param opt
  */
 export const renderSpectrum = async (opt: RenderSpectrumOptions): Promise<void> => {
-    const {renderer, context, config} = opt;
+    const {renderer, context, config: {analyzer, audioContextOptions}} = opt;
     const {width, height} = context.canvas;
 
     // Render spectrum
-    const {minDecibels, maxDecibels} = config.analyzer;
+    const {minDecibels, maxDecibels} = analyzer;
     await renderer.startRender({
         width,
         height,
         minDecibels,
-        maxDecibels
+        maxDecibels,
+        audioContextOptions
     });
 
     drawSpectrum(opt);

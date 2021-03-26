@@ -116,7 +116,8 @@ export const drawSkeleton = (opt: RenderSkeletonOptions): void => {
         // Draw info text
         {
             const {name, type} = renderer.file;
-            const infoText = `${name} (${type}, ${sampleRate} Hz, ${numberOfChannels} channels)`;
+            const bitrate = renderer.getBitrate() ?? 0;
+            const infoText = `${name} (${type}, ${sampleRate} Hz, ${bitrate / 1000}kbps, ${numberOfChannels} channels)`;
             context.textAlign = 'left';
             context.textBaseline = 'bottom';
             context.font = '14px monospace';

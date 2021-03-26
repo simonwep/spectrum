@@ -47,6 +47,15 @@ export class SpectrumRenderer {
         return this.canvas ?? null;
     }
 
+    public getBitrate(): number | null {
+        if (this.audio) {
+            const {duration, length} = this.audio;
+            return (length / duration) * 8; // 32 bit audio
+        }
+
+        return null;
+    }
+
     /**
      * Renders an audio spectrum to a canvas.
      * If the previously rendered spectrum is smaller it'll be down-scaled.

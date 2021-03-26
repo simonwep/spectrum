@@ -6,16 +6,16 @@ import {on} from '@utils/events';
 import {realSize} from '@utils/realSize';
 import {throttlePromise} from '@utils/throttlePromise';
 
-// Configuration
 const config = {
-
-    // Analyzer options
     analyzer: {
         minDecibels: -120,
         maxDecibels: -20
     },
 
-    // Visual options
+    audioContextOptions: {
+        sampleRate: 48000
+    },
+
     visuals: {
         graphMargin: [40, 100, 35, 65],
         decibelBarWidth: 10,
@@ -27,9 +27,6 @@ const config = {
 
 export type Configuration = typeof config;
 
-/**
- * Application setup.
- */
 export const setup = (): void => {
     let renderer: SpectrumRenderer | undefined;
 
