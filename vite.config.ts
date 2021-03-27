@@ -3,16 +3,16 @@ import {defineConfig} from 'vite';
 import {minifyHtml} from 'vite-plugin-html';
 import {VitePWA} from 'vite-plugin-pwa';
 import manifest from './manifest.json';
-import pkg from './package.json';
 
 export default defineConfig({
+    base: '',
+
     esbuild: {
         target: 'esnext'
     },
 
-    base: '',
     define: {
-        'env.VERSION': JSON.stringify(pkg.version)
+        'env.BUILD_TIMESTAMP': JSON.stringify(Date.now())
     },
 
     resolve: {

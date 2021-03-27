@@ -1,3 +1,3 @@
 declare let env: {
-    VERSION: string;
+    BUILD_TIMESTAMP: string;
 }

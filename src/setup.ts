@@ -17,7 +17,7 @@ const config = {
     },
 
     visuals: {
-        graphMargin: [40, 100, 35, 65],
+        graphMargin: [25, 100, 35, 65],
         decibelBarWidth: 10,
         tickMinDistance: 50,
         tickThickness: 1,

@@ -27,11 +27,6 @@ export const drawSkeleton = (opt: RenderSkeletonOptions): void => {
     context.strokeStyle = 'white';
     context.font = '12px monospace';
 
-    // Draw version
-    context.textAlign = 'end';
-    context.textBaseline = 'hanging';
-    context.fillText(`v${env.VERSION}`, width - 10, 10);
-
     // Draw graph box
     context.strokeRect(l - 0.5, t - 0.5, boxWidth + 1, boxHeight + 1);
 
