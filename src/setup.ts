@@ -136,15 +136,14 @@ export const setup = (): void => {
         }
     });
 
-// React to browser changes
+    // React to browser changes
     window.addEventListener('resize', redraw);
     document.addEventListener('fullscreenchange', redraw);
 
-// Buttons
+    // Buttons
     document.getElementById('help-screen-btn')?.addEventListener('click', toggleHelpScreen);
     document.getElementById('help')?.addEventListener('click', toggleHelpScreen);
 
-// Initialize
+    // Initialize
     redraw();
-
 };

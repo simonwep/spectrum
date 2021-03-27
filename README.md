@@ -36,6 +36,12 @@ Unfortunately not all browsers support things like the [OfflineAudioContext](htt
 
 I'd say, pick any audio file and [try it out](https://spectrum.reinisch.io) :)
 
+### Features
+* ⚡ Fast - we're using native web API's.
+* 🔽 Installble - it's a PWA!  
+* ⌨ Shortcuts - downloading the graph or changing decibel levels, there's a shortcut for it.
+* ✨ Minimalistic - does one job, as good as possible. Just a few kilobytes of JS and CSS are served.
+
 ### Planned features
 * [x] - Make it a PWA.
 * [ ] - A better logo (I'm running out of ideas for material design, drop a PR if you have an idea :)).
