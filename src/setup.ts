@@ -74,6 +74,20 @@ export const setup = (): void => {
         }
     };
 
+    const acceptFile = (file: File): void => {
+        renderer = undefined;
+        redraw();
+
+        renderer = new SpectrumRenderer(file, {
+            width: screen.availWidth,
+            height: screen.availHeight,
+            maxDecibels: config.analyzer.maxDecibels,
+            minDecibels: config.analyzer.minDecibels
+        });
+
+        redraw();
+    };
+
     // Wait for files
     on('#canvas', ['dragover', 'drop'], (evt: DragEvent) => {
         evt.preventDefault();
@@ -88,20 +102,7 @@ export const setup = (): void => {
         // React to when a file is dropped
         if (evt.type === 'drop') {
             const file = evt.dataTransfer.files?.[0];
-
-            if (file) {
-                renderer = undefined;
-                redraw();
-
-                renderer = new SpectrumRenderer(file, {
-                    width: screen.availWidth,
-                    height: screen.availHeight,
-                    maxDecibels: config.analyzer.maxDecibels,
-                    minDecibels: config.analyzer.minDecibels
-                });
-
-                redraw();
-            }
+            file && acceptFile(file);
         }
     });
 
@@ -134,6 +135,12 @@ export const setup = (): void => {
                 }
             }
         }
+    });
+
+    // Manual file input
+    on('#file-input', 'change', (evt: InputEvent) => {
+        const file = (evt.target as HTMLInputElement).files?.[0];
+        file && acceptFile(file);
     });
 
     // React to browser changes
