@@ -1,6 +1,6 @@
 import {resolve} from 'path';
 import {defineConfig} from 'vite';
-import {minifyHtml} from 'vite-plugin-html';
+import {createHtmlPlugin} from 'vite-plugin-html';
 import {VitePWA} from 'vite-plugin-pwa';
 import manifest from './manifest.json';
 
@@ -24,7 +24,7 @@ export default defineConfig({
     },
 
     plugins: [
-        minifyHtml(),
+        createHtmlPlugin(),
         VitePWA({
             registerType: 'autoUpdate',
             strategies: 'generateSW',

@@ -68,7 +68,7 @@ export const setup = (): void => {
                 .replace(/\W+/g, '-')
                 .replace(/\.[^.]+$/, '');
 
-            (spectrumOnly ? renderer?.canvas : canvas).toBlob(blob => {
+            (spectrumOnly ? renderer.canvas as HTMLCanvasElement : canvas).toBlob(blob => {
                 blob && downloadBlob(blob, `spectrum-${filename}.png`);
             }, 'image/png');
         }

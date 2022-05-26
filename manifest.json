@@ -3,7 +3,6 @@
     "short_name": "ASA",
     "start_url": "./",
     "display": "standalone",
-    "orientation": "portrait",
     "background_color": "#000",
     "theme_color": "#000",
     "icons": [
