@@ -18,6 +18,9 @@
         "allowSyntheticDefaultImports": true,
         "experimentalDecorators": true,
         "forceConsistentCasingInFileNames": true,
+        "types": [
+            "vite-plugin-pwa/client"
+        ],
         "baseUrl": ".",
         "paths": {
             "@utils/*": ["./src/utils/*"],
