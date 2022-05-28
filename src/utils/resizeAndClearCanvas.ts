@@ -3,18 +3,13 @@ interface Size {
     width: number;
 }
 
-/**
- * Resolves the actual size of an element in pixel.
- * @param el
- * @param ratio
- */
-export const realSize = (
-    el: HTMLCanvasElement,
-    ratio = devicePixelRatio
+export const resolveRealCanvasSize = (
+  canvas: HTMLCanvasElement,
+  ratio = devicePixelRatio
 ): Size => {
-    el.width = 0;
-    el.height = 0;
-    const rect = el.getBoundingClientRect();
+    canvas.width = 0;
+    canvas.height = 0;
+    const rect = canvas.getBoundingClientRect();
 
     // See https://stackoverflow.com/a/35244519/7664765
     const width = Math.round(ratio * rect.right) - Math.round(ratio * rect.left);

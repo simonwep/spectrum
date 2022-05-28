@@ -1,156 +1,167 @@
-import {SpectrumRenderer} from '@audio/SpectrumRenderer';
-import {drawSkeleton} from '@renderer/drawSkeleton';
-import {drawSpectrum, renderSpectrum} from '@renderer/renderSpectrum';
-import {downloadBlob} from '@utils/downloadBlob';
+import {DecibelBarVisuals, renderDecibelBar} from '@renderer/renderDecibelBar';
+import {FrequencyBandVisuals, renderFrequencyBand} from '@renderer/renderFrequencyBand';
+import {renderInfoText} from '@renderer/renderInfoText';
+import {renderTimeBar, TimeBarVisuals} from '@renderer/renderTimeBar';
+import {applyMargin, Margin} from '@renderer/utils';
 import {on} from '@utils/events';
-import {realSize} from '@utils/realSize';
-import {throttlePromise} from '@utils/throttlePromise';
+import {resolveRealCanvasSize} from '@utils/resizeAndClearCanvas';
+import prettyBytes from 'pretty-bytes';
+import {AudioFileSpectrumRenderer, createAudioFileSpectrumRenderer} from './lib/createAudioFileSpectrumRenderer';
+import {createRealtimeSpectrumRenderer, RealtimeSpectrumRenderer, TimeFrame} from './lib/createRealtimeSpectrumRenderer';
 
-const config = {
-    analyzer: {
-        minDecibels: -120,
-        maxDecibels: -20
-    },
-
-    audioContextOptions: {
-        sampleRate: 48000
-    },
-
-    visuals: {
-        graphMargin: [25, 100, 35, 65],
-        decibelBarWidth: 10,
-        tickMinDistance: 50,
-        tickThickness: 1,
-        tickLength: 10
-    }
+const margin: Margin = {
+    top: 35,
+    right: 100,
+    bottom: 35,
+    left: 65
 };
 
-export type Configuration = typeof config;
+const ticksLayout: TimeBarVisuals = {
+    tickMinDistance: 50,
+    tickThickness: 1,
+    tickLength: 10
+};
 
-export const setup = (): void => {
-    let renderer: SpectrumRenderer | undefined;
+const decibelBarLayout: DecibelBarVisuals = {
+    ...ticksLayout,
+    width: 10
+};
 
-    // Canvas, context and spectrum renderer
-    const canvas = document.getElementById('canvas') as HTMLCanvasElement;
-    const context = canvas.getContext('2d', {
-        alpha: false
-    }) as CanvasRenderingContext2D;
+const frequencyBandLayout: FrequencyBandVisuals = {
+    ...ticksLayout
+};
 
-    // Main functions
-    const startRendering = throttlePromise(async () => {
-        if (renderer) {
-            await renderSpectrum({renderer, context, config});
-            redraw();
-        }
-    }, 500);
+// Canvas, context and spectrum renderer
+const canvas = document.getElementById('canvas') as HTMLCanvasElement;
+const context = canvas.getContext('2d', {
+    alpha: false
+}) as CanvasRenderingContext2D;
 
-    const redraw = () => {
+let audioContext: OfflineAudioContext | AudioContext | undefined;
+let audioAnalyzer: AnalyserNode | undefined;
+let audioTimeFrame: TimeFrame | undefined;
+let renderer: AudioFileSpectrumRenderer | RealtimeSpectrumRenderer | undefined;
 
-        // Resize (and clear canvas by this)
-        const {width, height} = realSize(canvas);
-        canvas.width = width;
-        canvas.height = height;
+const renderUi = (text: string, graph?: HTMLCanvasElement) => {
+    const rect = applyMargin(canvas, margin);
 
-        // Draw UI skeleton
-        drawSkeleton({renderer, context, config});
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    graph && context.drawImage(graph, margin.left, margin.top);
 
-        // Draw current spectrum
-        renderer && drawSpectrum({renderer, context, config});
+    context.strokeStyle = 'white';
+    context.strokeRect(rect.left - 0.5, rect.top - 0.5, rect.width + 1, rect.height + 1);
 
-        // Start next render cycle
-        startRendering();
-    };
+    audioTimeFrame && renderTimeBar({
+        context, margin,
+        time: audioTimeFrame,
+        layout: ticksLayout
+    });
 
-    const toggleHelpScreen = () => document.getElementById('help')?.classList.toggle('visible');
-    const downloadSpectrum = (spectrumOnly?: boolean) => {
-        if (renderer?.canvas) {
-            const filename = renderer.file.name
-                .replace(/\W+/g, '-')
-                .replace(/\.[^.]+$/, '');
+    renderDecibelBar({
+        context, margin,
+        decibelRange: audioAnalyzer,
+        layout: decibelBarLayout
+    });
 
-            (spectrumOnly ? renderer.canvas as HTMLCanvasElement : canvas).toBlob(blob => {
-                blob && downloadBlob(blob, `spectrum-${filename}.png`);
-            }, 'image/png');
-        }
-    };
+    renderFrequencyBand({
+        context, margin,
+        layout: frequencyBandLayout,
+        sampleRate: audioContext?.sampleRate
+    });
 
-    const acceptFile = (file: File): void => {
-        renderer = undefined;
-        redraw();
+    renderInfoText({context, margin, text});
+};
 
-        renderer = new SpectrumRenderer(file, {
-            width: screen.availWidth,
-            height: screen.availHeight,
-            maxDecibels: config.analyzer.maxDecibels,
-            minDecibels: config.analyzer.minDecibels
-        });
+const resize = () => {
+    const {width, height} = resolveRealCanvasSize(canvas);
+    const {top, right, bottom, left} = margin;
 
-        redraw();
-    };
+    canvas.width = width;
+    canvas.height = height;
 
-    // Wait for files
-    on('#canvas', ['dragover', 'drop'], (evt: DragEvent) => {
+    renderer?.resize(width - left - right, height - top - bottom);
+    renderUi(audioContext ? 'Loading...' : 'Record (press "R") or select a file to render the spectrum for :)');
+};
+
+const mountFileBased = () => {
+    renderer?.destroy();
+    renderer = createAudioFileSpectrumRenderer((data) => {
+        const sampleRate = data.audioContext.sampleRate.toLocaleString();
+        const bitrate = (data.audioBuffer.length / data.audioBuffer.duration) * 8;
+        const text = `${data.audioFile.name} (${data.audioFile.type}, ${sampleRate} Hz, ${bitrate / 1000}kbps, ${data.audioBuffer.numberOfChannels} channels)`;
+
+        audioTimeFrame = {start: 0, end: data.audioBuffer.duration};
+        audioAnalyzer = data.audioAnalyzer;
+        audioContext = data.audioContext;
+
+        renderUi(text, data.canvas);
+    });
+
+    resize();
+};
+
+const mountRealtime = () => {
+    renderer?.destroy();
+    renderer = createRealtimeSpectrumRenderer((data) => {
+        const sampleRateText = data.audioContext.sampleRate.toLocaleString();
+        const bufferText = prettyBytes(data.bufferSize, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        const text = `🔴 Recording with a sample-rate of ${sampleRateText} (Buffer: ${bufferText})`;
+
+        audioTimeFrame = data.time;
+        audioAnalyzer = data.audioAnalyzer;
+        audioContext = data.audioContext;
+
+        renderUi(text, data.canvas);
+    });
+
+    resize();
+};
+
+const toggleHelpScreen = () => document.getElementById('help')?.classList.toggle('visible');
+
+// File input
+on('#file-input', 'change', (evt: InputEvent) => {
+    if (renderer?.name !== 'AudioFileSpectrumRenderer') mountFileBased();
+    void (renderer as AudioFileSpectrumRenderer).render((evt.target as HTMLInputElement).files?.[0]);
+});
+
+// Keyboard shortcuts
+on(window, 'keydown', (evt: KeyboardEvent) => {
+    if (evt.ctrlKey || evt.metaKey) {
         evt.preventDefault();
-
-        if (!evt.dataTransfer) {
-            return;
+        if (!renderer) return;
+        switch (evt.code) {
+            case 'ArrowUp':
+                renderer.analyzerOptions[evt.shiftKey ? 'minDecibels' : 'maxDecibels'] += 1;
+                break;
+            case 'ArrowDown':
+                renderer.analyzerOptions[evt.shiftKey ? 'minDecibels' : 'maxDecibels'] -= 1;
+                break;
         }
-
-        // Show copy icon for this data-transfer
-        evt.dataTransfer.dropEffect = 'copy';
-
-        // React to when a file is dropped
-        if (evt.type === 'drop') {
-            const file = evt.dataTransfer.files?.[0];
-            file && acceptFile(file);
+    } else {
+        switch (evt.code) {
+            case 'KeyF':
+                document.getElementById('header')?.classList.toggle('visible');
+                resize();
+                break;
+            case 'KeyH':
+                toggleHelpScreen();
+                break;
+            case 'KeyR':
+                mountRealtime();
+                void (renderer as RealtimeSpectrumRenderer).start();
         }
-    });
+    }
+});
 
-    // Shortcuts
-    on(window, 'keydown', (evt: KeyboardEvent) => {
-        if (evt.ctrlKey || evt.metaKey) {
-            evt.preventDefault();
+// React to browser changes
+window.addEventListener('resize', resize);
+document.addEventListener('fullscreenchange', resize);
 
-            switch (evt.code) {
-                case 'KeyS': {
-                    return downloadSpectrum(evt.shiftKey);
-                }
-                case 'ArrowUp': {
-                    config.analyzer[evt.shiftKey ? 'minDecibels' : 'maxDecibels'] += 1;
-                    return redraw();
-                }
-                case 'ArrowDown': {
-                    config.analyzer[evt.shiftKey ? 'minDecibels' : 'maxDecibels'] -= 1;
-                    return redraw();
-                }
-            }
-        } else {
-            switch (evt.code) {
-                case 'KeyF': {
-                    document.getElementById('header')?.classList.toggle('visible');
-                    return redraw();
-                }
-                case 'KeyH': {
-                    return toggleHelpScreen();
-                }
-            }
-        }
-    });
+// Buttons
+document.getElementById('help-screen-btn')?.addEventListener('click', toggleHelpScreen);
+document.getElementById('help')?.addEventListener('click', toggleHelpScreen);
 
-    // Manual file input
-    on('#file-input', 'change', (evt: InputEvent) => {
-        const file = (evt.target as HTMLInputElement).files?.[0];
-        file && acceptFile(file);
-    });
-
-    // React to browser changes
-    window.addEventListener('resize', redraw);
-    document.addEventListener('fullscreenchange', redraw);
-
-    // Buttons
-    document.getElementById('help-screen-btn')?.addEventListener('click', toggleHelpScreen);
-    document.getElementById('help')?.addEventListener('click', toggleHelpScreen);
-
-    // Initialize
-    redraw();
-};
+// Initialize
+resize();
+mountRealtime();

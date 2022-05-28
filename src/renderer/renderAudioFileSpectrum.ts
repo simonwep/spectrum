@@ -1,16 +1,12 @@
-import {SpectrumRenderer} from '@audio/SpectrumRenderer';
+import {AudioFileSpectrumRenderer} from '@audio/AudioFileSpectrumRenderer';
 import {Configuration} from '../setup';
 
 interface RenderSpectrumOptions {
-    renderer: SpectrumRenderer;
+    renderer: AudioFileSpectrumRenderer;
     context: CanvasRenderingContext2D;
     config: Configuration;
 }
 
-/**
- * Draws the most recently rendered spectrum.
- * @param opt
- */
 export const drawSpectrum = (opt: RenderSpectrumOptions): void => {
     const {renderer, context, config} = opt;
     const {width, height} = context.canvas;
@@ -25,23 +21,17 @@ export const drawSpectrum = (opt: RenderSpectrumOptions): void => {
     }
 };
 
-/**
- * Renders an audio spectrum to a canvas context.
- * @param opt
- */
 export const renderSpectrum = async (opt: RenderSpectrumOptions): Promise<void> => {
     const {renderer, context, config: {analyzer, audioContextOptions}} = opt;
     const {width, height} = context.canvas;
 
     // Render spectrum
     const {minDecibels, maxDecibels} = analyzer;
-    await renderer.startRender({
+    await renderer.render({
         width,
         height,
         minDecibels,
         maxDecibels,
         audioContextOptions
     });
-
-    drawSpectrum(opt);
 };

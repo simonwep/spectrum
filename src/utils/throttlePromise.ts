@@ -1,25 +1,29 @@
 type AnyAsyncFunction = (...args: unknown[]) => Promise<unknown>;
 
-/**
- * Throttles the execution of an promise
- * @param fn
- * @param limit
- */
-export const throttlePromise = <F extends AnyAsyncFunction>(fn: F, limit = 500): ((...args: Parameters<F>) => void) => {
-    let lastExecution = 0, timeout = -1;
+export const throttlePromise = <F extends AnyAsyncFunction>(fn: F, time = 500): ((...args: Parameters<F>) => void) => {
+    let lastExecution = -1;
+    let lastArgs: Parameters<F>, timeout = -1, active = false;
 
-    return function wrapper(...args: Parameters<F>): void {
-        const now = performance.now();
-        const diff = now - lastExecution;
+    const exec = async () => {
+        active = true;
+        await fn(...lastArgs);
+        lastExecution = performance.now();
+        active = false;
+    };
 
-        if (diff >= limit) {
-            clearTimeout(timeout);
-            fn(...args).then(() => {
-                lastExecution = now;
-                timeout = -1;
-            });
-        } else if (timeout === -1) {
-            timeout = setTimeout(() => fn(...args), diff);
+    return (...args: Parameters<F>): void => {
+        lastArgs = args;
+
+        if (active) {
+            return;
+        }
+
+        clearTimeout(timeout);
+        const diff = performance.now() - lastExecution;
+        if (diff >= time) {
+            void exec();
+        } else {
+            timeout = setTimeout(exec, diff);
         }
     };
 };

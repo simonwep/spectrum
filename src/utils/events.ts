@@ -12,19 +12,19 @@ export type EventBindingArgs = [
 
 interface EventBinding {
     (
-        target: (EventTarget | string) | (EventTarget | string)[],
-        events: string | Array<string>,
-        fn: AnyFunction,
-        options?: AddEventListenerOptions
+      target: (EventTarget | string) | (EventTarget | string)[],
+      events: string | Array<string>,
+      fn: AnyFunction,
+      options?: AddEventListenerOptions
     ): EventBindingArgs;
 }
 
 /* eslint-disable prefer-rest-params */
 function eventListener(method: Method): EventBinding {
     return (
-        target: (EventTarget | string) | (EventTarget | string)[],
-        events: string | Array<string>,
-        fn: AnyFunction, options = {}
+      target: (EventTarget | string) | (EventTarget | string)[],
+      events: string | Array<string>,
+      fn: AnyFunction, options = {}
     ): EventBindingArgs => {
         target = Array.isArray(target) ? target : [target];
         events = Array.isArray(events) ? events : [events];

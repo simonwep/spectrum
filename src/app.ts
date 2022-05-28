@@ -1,5 +1,4 @@
 import {registerSW} from 'virtual:pwa-register';
-import {setup} from './setup';
 import './styles/_index.scss';
 
 // Log build date
@@ -10,5 +9,5 @@ if (!('OfflineAudioContext' in window) || !('suspend' in window.OfflineAudioCont
     document.getElementById('incompatible')?.classList.add('visible');
 } else {
     registerSW();
-    setup();
+    import('./setup');
 }
