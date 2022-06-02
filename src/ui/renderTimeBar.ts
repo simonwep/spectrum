@@ -1,7 +1,7 @@
-import {applyMargin, Margin} from './/utils';
+import {applyMargin, Margin} from './utils';
 import {findFittingTicksAmount} from './utils/findFittingTicksAmount';
 import {prettyDuration} from '@utils/prettyDuration';
-import {TimeFrame} from '../lib/createRealtimeSpectrumRenderer';
+import {TimeFrame} from '../lib/core';
 
 export interface TimeBarVisuals {
     tickLength: number;

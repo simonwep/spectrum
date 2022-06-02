@@ -1,5 +1,5 @@
-import {SPECTRUM_BACKGROUND, SPECTRUM_UI_COLORS} from '../constants';
-import {CancelNextFrameLoop, createCanvas, eachFrame, createCanvasResizeObserver} from './utils';
+import {SPECTRUM_BACKGROUND, SPECTRUM_UI_COLORS} from '../../constants';
+import {CancelNextFrameLoop, createCanvas, eachFrame, createCanvasResizeObserver} from '../utils';
 
 export interface TimeFrame {
     start: number;
@@ -143,7 +143,7 @@ export const createRealtimeSpectrumRenderer = (
                 time.end = averageTimePerFrame * frames.length;
                 time.start = averageTimePerFrame * (frames.length - width);
             } else {
-                context.putImageData(spectrum, offset++, 0);
+                context.putImageData(spectrum, ++offset, 0);
                 time.end = averageTimePerFrame * width;
             }
 

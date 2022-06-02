@@ -1,13 +1,12 @@
+import {AudioFileSpectrumRenderer, createAudioFileSpectrumRenderer, createRealtimeSpectrumRenderer, RealtimeSpectrumRenderer, TimeFrame} from '@lib/core';
+import {DecibelBarVisuals, renderDecibelBar} from '@ui/renderDecibelBar';
+import {FrequencyBandVisuals, renderFrequencyBand} from '@ui/renderFrequencyBand';
+import {renderInfoText} from '@ui/renderInfoText';
+import {renderTimeBar, TimeBarVisuals} from '@ui/renderTimeBar';
+import {applyMargin, Margin} from '@ui/utils';
 import {resolveRealCanvasSize} from '@utils/resizeAndClearCanvas';
 import {selectFile} from '@utils/selectFile';
 import prettyBytes from 'pretty-bytes';
-import {AudioFileSpectrumRenderer, createAudioFileSpectrumRenderer} from './lib/createAudioFileSpectrumRenderer';
-import {createRealtimeSpectrumRenderer, RealtimeSpectrumRenderer, TimeFrame} from './lib/createRealtimeSpectrumRenderer';
-import {DecibelBarVisuals, renderDecibelBar} from './ui/renderDecibelBar';
-import {FrequencyBandVisuals, renderFrequencyBand} from './ui/renderFrequencyBand';
-import {renderInfoText} from './ui/renderInfoText';
-import {renderTimeBar, TimeBarVisuals} from './ui/renderTimeBar';
-import {applyMargin, Margin} from './ui/utils';
 
 const margin: Margin = {
     top: 35,
@@ -33,9 +32,7 @@ const frequencyBandLayout: FrequencyBandVisuals = {
 
 // Canvas, context and spectrum renderer
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
-const context = canvas.getContext('2d', {
-    alpha: false
-}) as CanvasRenderingContext2D;
+const context = canvas.getContext('2d', {alpha: false}) as CanvasRenderingContext2D;
 
 let audioContext: OfflineAudioContext | AudioContext | undefined;
 let audioAnalyzer: AnalyserNode | undefined;

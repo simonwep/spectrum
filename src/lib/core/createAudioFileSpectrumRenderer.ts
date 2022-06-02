@@ -1,5 +1,5 @@
-import {SPECTRUM_UI_COLORS} from '../constants';
-import {createCanvas, createCanvasResizeObserver, createAudioBuffer} from './utils';
+import {SPECTRUM_UI_COLORS} from '../../constants';
+import {createCanvas, createCanvasResizeObserver, createAudioBuffer} from '../utils';
 
 export interface AudioFileSpectrumRendererUpdate {
     canvas: HTMLCanvasElement;
