@@ -1,4 +1,4 @@
-import {hslToRgb} from '@utils/hslToRgb';
+import {hslToRgb} from '@utils/colors';
 
 const HUE_SILENCING = 270;
 const HUE_MAX = 300;

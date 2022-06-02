@@ -1,5 +1,5 @@
-import {applyMargin, Margin} from '@renderer/utils';
-import {findFittingTicksAmount} from '@utils/geometric';
+import {applyMargin, Margin} from './/utils';
+import {findFittingTicksAmount} from './utils/findFittingTicksAmount';
 import {prettyDuration} from '@utils/prettyDuration';
 import {TimeFrame} from '../lib/createRealtimeSpectrumRenderer';
 

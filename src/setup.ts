@@ -1,13 +1,13 @@
-import {DecibelBarVisuals, renderDecibelBar} from '@renderer/renderDecibelBar';
-import {FrequencyBandVisuals, renderFrequencyBand} from '@renderer/renderFrequencyBand';
-import {renderInfoText} from '@renderer/renderInfoText';
-import {renderTimeBar, TimeBarVisuals} from '@renderer/renderTimeBar';
-import {applyMargin, Margin} from '@renderer/utils';
-import {on} from '@utils/events';
 import {resolveRealCanvasSize} from '@utils/resizeAndClearCanvas';
+import {selectFile} from '@utils/selectFile';
 import prettyBytes from 'pretty-bytes';
 import {AudioFileSpectrumRenderer, createAudioFileSpectrumRenderer} from './lib/createAudioFileSpectrumRenderer';
 import {createRealtimeSpectrumRenderer, RealtimeSpectrumRenderer, TimeFrame} from './lib/createRealtimeSpectrumRenderer';
+import {DecibelBarVisuals, renderDecibelBar} from './ui/renderDecibelBar';
+import {FrequencyBandVisuals, renderFrequencyBand} from './ui/renderFrequencyBand';
+import {renderInfoText} from './ui/renderInfoText';
+import {renderTimeBar, TimeBarVisuals} from './ui/renderTimeBar';
+import {applyMargin, Margin} from './ui/utils';
 
 const margin: Margin = {
     top: 35,
@@ -120,13 +120,18 @@ const mountRealtime = () => {
 const toggleHelpScreen = () => document.getElementById('help')?.classList.toggle('visible');
 
 // File input
-on('#file-input', 'change', (evt: InputEvent) => {
-    if (renderer?.name !== 'AudioFileSpectrumRenderer') mountFileBased();
-    void (renderer as AudioFileSpectrumRenderer).render((evt.target as HTMLInputElement).files?.[0]);
+canvas.addEventListener('click', () => {
+    selectFile({
+        multiple: false,
+        accept: 'audio/*'
+    }).then(file => {
+        if (renderer?.name !== 'AudioFileSpectrumRenderer') mountFileBased();
+        void (renderer as AudioFileSpectrumRenderer).render(file);
+    });
 });
 
 // Keyboard shortcuts
-on(window, 'keydown', (evt: KeyboardEvent) => {
+window.addEventListener('keydown', (evt: KeyboardEvent) => {
     if (evt.ctrlKey || evt.metaKey) {
         evt.preventDefault();
         if (!renderer) return;
@@ -164,4 +169,3 @@ document.getElementById('help')?.addEventListener('click', toggleHelpScreen);
 
 // Initialize
 resize();
-mountRealtime();

@@ -1,5 +1,5 @@
-import {applyMargin, Margin} from '@renderer/utils';
-import {findFittingTicksAmount} from '@utils/geometric';
+import {applyMargin, Margin} from './/utils';
+import {findFittingTicksAmount} from './utils/findFittingTicksAmount';
 import {SPECTRUM_UI_COLORS} from '../constants';
 
 export interface DecibelBarVisuals {

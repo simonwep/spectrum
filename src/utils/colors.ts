@@ -7,17 +7,6 @@ const hueToRgb = (p: number, q: number, t: number): number => {
     return p;
 };
 
-/**
- * Converts an HSL color value to RGB. Conversion formula
- * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
- * Assumes h, s, and l are contained in the set [0, 1] and
- * returns r, g, and b in the set [0, 255].
- *
- * @param {number} h The hue
- * @param {number} s The saturation
- * @param {number} l The lightness
- * @return{Array} The RGB representation
- */
 export const hslToRgb = (h: number, s: number, l: number): [number, number, number] => {
     let r, g, b;
 

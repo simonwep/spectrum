@@ -79,8 +79,6 @@
     }
 }
 
-#incompatible {
-    > div {
-        padding: 1rem;
-    }
+#incompatible > div {
+    padding: 1rem;
 }
