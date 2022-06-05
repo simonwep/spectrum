@@ -19,6 +19,7 @@ interface Frame {
     at: number;
 }
 
+const FREQUENCY_RANGE = 28_000;
 const name = 'RealtimeSpectrumRenderer';
 
 export const createRealtimeSpectrumRenderer = (
@@ -101,7 +102,9 @@ export const createRealtimeSpectrumRenderer = (
         });
 
         // Create context and analyzer node
-        audioContext = new AudioContext();
+        audioContext = new AudioContext({
+            sampleRate: FREQUENCY_RANGE * 2
+        });
 
         // Connect analyzer node
         const analyzer = audioAnalyzer = audioContext.createAnalyser();
