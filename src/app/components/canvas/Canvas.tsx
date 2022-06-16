@@ -61,21 +61,21 @@ export const Canvas: FunctionalComponent = () => {
       rect.height + 1
     );
 
-    time &&
+    if (time) {
       renderTimeBar({
         context,
         margin,
         time,
         layout: ticksLayout,
       });
+    }
 
-    analyserNode &&
-      renderDecibelBar({
-        context,
-        margin,
-        decibelRange: analyserNode,
-        layout: decibelBarLayout,
-      });
+    renderDecibelBar({
+      context,
+      margin,
+      decibelRange: analyserNode,
+      layout: decibelBarLayout,
+    });
 
     renderFrequencyBand({
       context,
@@ -108,7 +108,7 @@ export const Canvas: FunctionalComponent = () => {
     resize();
     window.addEventListener('resize', resize);
     return () => window.removeEventListener('resize', resize);
-  }, [renderer]);
+  });
 
   useEffect(() => {
     setContext(
