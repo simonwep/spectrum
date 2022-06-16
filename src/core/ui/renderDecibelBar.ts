@@ -52,6 +52,7 @@ export const renderDecibelBar = ({
   context.fillRect(x0, y0, layout.width, rect.height);
   context.textAlign = 'left';
   context.textBaseline = 'middle';
+  context.font = '12px monospace';
 
   // Draw ticks for decimal bar
   const [ticks, spacing] = findFittingTicksAmount(

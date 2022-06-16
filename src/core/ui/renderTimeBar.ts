@@ -23,16 +23,15 @@ export const renderTimeBar = ({
   margin,
 }: TimeBarOptions) => {
   const rect = applyMargin(context.canvas, margin);
-
+  const duration = time.end - time.start;
   const outerBoxWidth = rect.width + 1;
   const [ticks, spacing] = findFittingTicksAmount(
     layout.tickMinDistance * 2,
     outerBoxWidth
   );
-  const duration = time.end - time.start;
 
-  context.fillStyle = 'white';
   context.strokeStyle = 'white';
+  context.fillStyle = 'white';
   context.textAlign = 'center';
   context.textBaseline = 'hanging';
   context.font = '12px monospace';

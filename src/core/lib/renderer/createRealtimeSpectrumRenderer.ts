@@ -99,6 +99,7 @@ export const createRealtimeSpectrumRenderer = (
   const stop = async () => {
     stopRendering?.();
     await audioContext?.close();
+    audioContext = undefined;
   };
 
   const start = async () => {

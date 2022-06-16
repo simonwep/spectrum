@@ -53,7 +53,9 @@ export const Canvas: FunctionalComponent = () => {
     context.clearRect(0, 0, canvas.current.width, canvas.current.height);
     graph && context.drawImage(graph, margin.left, margin.top);
 
+    context.fillStyle = 'white';
     context.strokeStyle = 'white';
+
     context.strokeRect(
       rect.left - 0.5,
       rect.top - 0.5,

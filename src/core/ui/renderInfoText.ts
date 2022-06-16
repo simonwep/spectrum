@@ -14,6 +14,6 @@ export const renderInfoText = ({
   context.fillStyle = 'white';
   context.textAlign = 'left';
   context.textBaseline = 'bottom';
-  context.font = '14px monospace';
+  context.font = '12px monospace';
   context.fillText(text, margin.left, margin.top - 8);
 };
