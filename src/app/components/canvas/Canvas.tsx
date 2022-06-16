@@ -145,9 +145,8 @@ export const Canvas: FunctionalComponent = () => {
           );
         });
 
-        realtime.start().then(() => {
-          setRenderer(realtime);
-        });
+        setRenderer(realtime);
+        void realtime.start();
         break;
       case 'file':
         const file = createAudioFileSpectrumRenderer((data) => {
@@ -169,9 +168,8 @@ export const Canvas: FunctionalComponent = () => {
           );
         });
 
-        file.render(store.state.renderer.file).then(() => {
-          setRenderer(file);
-        });
+        setRenderer(file);
+        void file.render(store.state.renderer.file);
         break;
     }
   }, [store.state.renderer, context]);
