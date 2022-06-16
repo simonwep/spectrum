@@ -1,14 +1,15 @@
-import {defineConfig} from 'vite';
-import {createHtmlPlugin} from 'vite-plugin-html';
+import preact from '@preact/preset-vite';
 import {VitePWA} from 'vite-plugin-pwa';
 import tsconfigPaths from 'vite-tsconfig-paths';
-import manifest from './manifest.json';
+import {defineConfig} from 'vite';
+import manifest from './public/manifest.json';
 
 export default defineConfig({
-    base: '',
-
     esbuild: {
-        target: 'esnext'
+        target: 'esnext',
+        jsxInject: '',
+        jsxFactory: 'preact',
+        jsxFragment: 'Fragment'
     },
 
     define: {
@@ -20,8 +21,8 @@ export default defineConfig({
     },
 
     plugins: [
+        preact(),
         tsconfigPaths({loose: true}),
-        createHtmlPlugin(),
         VitePWA({
             registerType: 'autoUpdate',
             strategies: 'generateSW',

@@ -1,0 +1,24 @@
+
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
+:root {
+    --font-family: -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Cantarell, Ubuntu, roboto, noto, arial, sans-serif;
+
+    --btn-realtime: #ff5e5e;
+    --btn-realtime-hover: #f34949;
+    --btn-realtime-focus-shadow: 0 0 0 2px #671d1d;
+
+    --btn-file: #6482ff;
+    --btn-file-hover: #4768ea;
+    --btn-file-focus-shadow: 0 0 0 2px #344278;
+}
+
+html, body, #app {
+    background: black;
+    height: 100%;
+    font-family: var(--font-family);
+}

@@ -1,32 +1,35 @@
 {
+    "include": ["src"],
+    "references": [
+        {"path": "./tsconfig.node.json"}
+    ],
     "compilerOptions": {
-        "module": "esnext",
-        "lib": ["ESNext", "dom", "dom.iterable"],
-        "declaration": true,
-        "emitDeclarationOnly": true,
-        "outDir": "./types",
-        "rootDir": "./src",
-        "strict": true,
         "target": "ESNext",
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "resolveJsonModule": true,
-        "noImplicitReturns": true,
-        "noFallthroughCasesInSwitch": true,
-        "moduleResolution": "node",
+        "useDefineForClassFields": true,
+        "lib": ["DOM", "DOM.Iterable", "ESNext"],
+        "allowJs": false,
+        "skipLibCheck": true,
+        "esModuleInterop": false,
         "allowSyntheticDefaultImports": true,
-        "experimentalDecorators": true,
+        "strict": true,
         "forceConsistentCasingInFileNames": true,
+        "module": "ESNext",
+        "moduleResolution": "Node",
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "noEmit": true,
+        "jsx": "preserve",
+        "jsxFactory": "h",
+        "jsxFragmentFactory": "Fragment",
+        "baseUrl": ".",
         "types": [
-            "vite/client",
             "vite-plugin-pwa/client"
         ],
-        "baseUrl": ".",
         "paths": {
-            "@utils/*": ["./src/utils/*"],
-            "@lib/*": ["./src/lib/*"],
-            "@ui/*": ["./src/ui/*"]
+            "@components/*": ["src/app/components/*"],
+            "@utils/*": ["src/utils/*"],
+            "@core/*": ["src/core/*"],
+            "@store": ["src/store/index.ts"]
         }
-    },
-    "include": ["src/**/*.ts"]
+    }
 }
