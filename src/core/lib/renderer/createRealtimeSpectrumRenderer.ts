@@ -40,7 +40,7 @@ export const createRealtimeSpectrumRenderer = (
   const [canvas, context] = createCanvas();
   const { on, off, emit } = createEventBus<RealtimeSpectrumRendererEvents>();
 
-  let rendering = false;
+  const state = { rendering: false };
   let audioContext: AudioContext | undefined;
   let audioAnalyzer: AnalyserNode | undefined;
   let stopRendering: CancelNextFrameLoop | undefined;
@@ -73,7 +73,7 @@ export const createRealtimeSpectrumRenderer = (
     canvas.width = width;
     canvas.height = height;
 
-    if (!rendering || !frames.length) {
+    if (!frames.length) {
       return;
     }
 
@@ -106,17 +106,15 @@ export const createRealtimeSpectrumRenderer = (
   };
 
   const stop = async () => {
+    state.rendering = false;
     stopRendering?.();
-    await audioContext?.close();
-    audioContext = undefined;
     emit('stop');
   };
 
   const start = async () => {
-    if (rendering) return;
+    if (state.rendering) return;
     const start = performance.now();
-    rendering = true;
-    emit('start');
+    state.rendering = true;
 
     // Get user media and create media recorder
     const media = await navigator.mediaDevices.getUserMedia({
@@ -124,6 +122,7 @@ export const createRealtimeSpectrumRenderer = (
     });
 
     // Create context and analyzer node
+    await audioContext?.close();
     audioContext = new AudioContext({
       sampleRate: FREQUENCY_RANGE * 2,
     });
@@ -178,9 +177,21 @@ export const createRealtimeSpectrumRenderer = (
       bufferSize += buffer.length;
       update();
     });
+
+    emit('start');
   };
 
-  return { on, off, name, analyzerOptions, resize, start, stop, destroy };
+  return {
+    state,
+    on,
+    off,
+    name,
+    analyzerOptions,
+    resize,
+    start,
+    stop,
+    destroy,
+  };
 };
 
 export type RealtimeSpectrumRenderer = ReturnType<

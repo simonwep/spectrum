@@ -15,6 +15,18 @@
     }
 }
 
+button.startStop {
+    background: var(--btn-start-stop);
+
+    &:hover {
+        background: var(--btn-start-stop-hover);
+    }
+
+    &:focus {
+        box-shadow: var(--btn-start-stop-focus-shadow);
+    }
+}
+
 button.file {
     background: var(--btn-file);
 

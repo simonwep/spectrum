@@ -8,6 +8,10 @@
 :root {
     --font-family: -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Cantarell, Ubuntu, roboto, noto, arial, sans-serif;
 
+    --btn-start-stop: #eb3be9;
+    --btn-start-stop-hover: #c729c5;
+    --btn-start-stop-focus-shadow: 0 0 0 2px #672166;
+
     --btn-realtime: #ff5e5e;
     --btn-realtime-hover: #f34949;
     --btn-realtime-focus-shadow: 0 0 0 2px #671d1d;

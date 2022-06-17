@@ -99,8 +99,11 @@ export const Canvas: FunctionalComponent = () => {
     canvas.current.width = width;
     canvas.current.height = height;
 
-    renderer?.resize(width - left - right, height - top - bottom);
-    renderUi('Record audio or select an file to analyze...');
+    if (renderer) {
+      renderer?.resize(width - left - right, height - top - bottom);
+    } else {
+      renderUi('Record audio or select an file to analyze...');
+    }
   };
 
   useEffect(() => {
@@ -149,6 +152,7 @@ export const Canvas: FunctionalComponent = () => {
         });
 
         setRenderer(realtime);
+        store.setRendererInstance(realtime);
         void realtime.start();
         break;
       case 'file':
@@ -172,6 +176,7 @@ export const Canvas: FunctionalComponent = () => {
         });
 
         setRenderer(file);
+        store.setRendererInstance(file);
         void file.render(store.state.renderer.file);
         break;
     }

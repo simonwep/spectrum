@@ -21,7 +21,7 @@ export const createAudioFileSpectrumRenderer = (
   const [canvas, context] = createCanvas();
   const { on, off, emit } = createEventBus<AudioFileSpectrumRendererEvents>();
 
-  let rendering = false;
+  const state = { rendering: false };
   let audioContext: OfflineAudioContext | undefined;
   let audioAnalyzer: AnalyserNode | undefined;
   let audioBuffer: AudioBuffer | undefined;
@@ -57,8 +57,8 @@ export const createAudioFileSpectrumRenderer = (
   };
 
   const render = async (file = audioFile) => {
-    if (rendering || !file) return;
-    rendering = true;
+    if (state.rendering || !file) return;
+    state.rendering = true;
     audioFile = file;
     audioBuffer = await createAudioBuffer(file);
 
@@ -112,12 +112,12 @@ export const createAudioFileSpectrumRenderer = (
 
     // Put on canvas
     context.putImageData(imageData, 0, 0);
-    rendering = false;
+    state.rendering = false;
     update();
   };
 
   const destroy = () => {
-    rendering = false;
+    state.rendering = false;
     emit('destroy');
   };
 
@@ -127,7 +127,7 @@ export const createAudioFileSpectrumRenderer = (
     void render();
   };
 
-  return { on, off, name, analyzerOptions, resize, render, destroy };
+  return { state, on, off, name, analyzerOptions, resize, render, destroy };
 };
 
 export type AudioFileSpectrumRenderer = ReturnType<

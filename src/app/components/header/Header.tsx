@@ -1,9 +1,12 @@
+import { RealtimeSpectrumRenderer } from '@core/lib/renderer';
 import { useStore } from '@store';
 import { selectFile } from '@utils/selectFile';
 import { FunctionalComponent } from 'preact';
+import { useEffect, useState } from 'preact/hooks';
 import styles from './Header.module.scss';
 
 export const Header: FunctionalComponent = () => {
+  const [recording, setRecording] = useState(false);
   const store = useStore();
 
   const renderer = store.state.renderer?.type;
@@ -23,14 +26,45 @@ export const Header: FunctionalComponent = () => {
     });
   };
 
+  const toggleRecording = () => {
+    const instance = store.state.rendererInstance as RealtimeSpectrumRenderer;
+
+    console.log(instance);
+    if (instance?.name === 'RealtimeSpectrumRenderer') {
+      if (instance.state.rendering) {
+        instance.stop();
+      } else {
+        instance.start();
+      }
+    }
+  };
+
+  useEffect(() => {
+    const instance = store.state.rendererInstance as RealtimeSpectrumRenderer;
+
+    if (instance?.name === 'RealtimeSpectrumRenderer') {
+      instance.on('start', () => setRecording(true));
+      instance.on('stop', () => setRecording(false));
+      setRecording(instance.state.rendering);
+    }
+  }, [store.state.rendererInstance]);
+
   return (
     <div className={styles.header}>
+      {renderer === 'realtime' && (
+        <button className={styles.startStop} onClick={toggleRecording}>
+          {recording ? 'Pause' : 'Resume'}
+        </button>
+      )}
+
       <button className={styles.realtime} onClick={toggleRealtime}>
-        {renderer === 'realtime' ? 'Stop recording' : 'Record'}
+        {renderer === 'realtime' ? 'Reset' : 'Record'}
       </button>
+
       <button className={styles.file} onClick={openFile}>
         ANALYZE FILE
       </button>
+
       <a
         href="https://github.com/Simonwep/spectrum"
         className={styles.gitHubLink}
