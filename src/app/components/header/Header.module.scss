@@ -1,53 +1,19 @@
 .header {
     display: flex;
-    grid-gap: 5px;
-    padding: 5px;
+    grid-gap: 10px;
+    padding: 5px 10px;
 
     > button, a {
+        display: flex;
+        align-items: center;
         all: unset;
         color: white;
         font-size: 10px;
         font-weight: 500;
-        padding: 3px 5px;
+        height: 24px;
         border-radius: 3px;
         cursor: pointer;
         text-transform: uppercase;
-    }
-}
-
-button.startStop {
-    background: var(--btn-start-stop);
-
-    &:hover {
-        background: var(--btn-start-stop-hover);
-    }
-
-    &:focus {
-        box-shadow: var(--btn-start-stop-focus-shadow);
-    }
-}
-
-button.file {
-    background: var(--btn-file);
-
-    &:hover {
-        background: var(--btn-file-hover);
-    }
-
-    &:focus {
-        box-shadow: var(--btn-file-focus-shadow);
-    }
-}
-
-button.realtime {
-    background: var(--btn-realtime);
-
-    &:hover {
-        background: var(--btn-realtime-hover);
-    }
-
-    &:focus {
-        box-shadow: var(--btn-realtime-focus-shadow);
     }
 }
 
@@ -55,9 +21,4 @@ a.gitHubLink {
     margin-left: auto;
     background: transparent;
     padding: 2px;
-
-    > svg {
-        height: 100%;
-        fill: white;
-    }
 }

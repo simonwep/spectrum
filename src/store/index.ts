@@ -25,22 +25,21 @@ export interface State {
   rendererInstance: RendererInstance;
 }
 
-let state: State = {
+const INITIAL_STATE: State = {
   renderer: undefined,
   rendererInstance: undefined,
 };
 
-const hooks: Set<StateUpdater<Record<string, never>>> = new Set();
+const hooks: Set<StateUpdater<State>> = new Set();
 const setState = (next: State) => {
-  state = next;
-  hooks.forEach((render) => render({}));
+  hooks.forEach((render) => render(next));
 };
 
 export const useStore = () => {
-  const [, update] = useState({});
+  const [state, update] = useState(INITIAL_STATE);
 
   const setRenderer = (renderer: RenderType) =>
-    setState({ ...state, renderer });
+    setState({ ...state, renderer, rendererInstance: undefined });
 
   const setRendererInstance = (rendererInstance: RendererInstance) =>
     setState({ ...state, rendererInstance });
