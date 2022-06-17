@@ -1,9 +1,4 @@
-import { SPECTRUM_UI_COLORS } from '../../../constants';
-import {
-  createCanvas,
-  createCanvasResizeObserver,
-  createAudioBuffer,
-} from '../utils';
+import { createAudioBuffer, createCanvas, createEventBus } from '../utils';
 
 export interface AudioFileSpectrumRendererUpdate {
   canvas: HTMLCanvasElement;
@@ -13,12 +8,18 @@ export interface AudioFileSpectrumRendererUpdate {
   audioFile: File;
 }
 
+export interface AudioFileSpectrumRendererEvents {
+  destroy: void;
+  update: AudioFileSpectrumRendererUpdate;
+}
+
 const name = 'AudioFileSpectrumRenderer';
 
 export const createAudioFileSpectrumRenderer = (
-  onUpdate: (update: AudioFileSpectrumRendererUpdate) => void
+  colors: Uint8ClampedArray[]
 ) => {
   const [canvas, context] = createCanvas();
+  const { on, off, emit } = createEventBus<AudioFileSpectrumRendererEvents>();
 
   let rendering = false;
   let audioContext: OfflineAudioContext | undefined;
@@ -45,7 +46,13 @@ export const createAudioFileSpectrumRenderer = (
 
   const update = () => {
     if (audioFile && audioContext && audioAnalyzer && audioBuffer) {
-      onUpdate({ canvas, audioFile, audioContext, audioAnalyzer, audioBuffer });
+      emit('update', {
+        canvas,
+        audioFile,
+        audioContext,
+        audioAnalyzer,
+        audioBuffer,
+      });
     }
   };
 
@@ -97,7 +104,7 @@ export const createAudioFileSpectrumRenderer = (
 
         if (loudness) {
           const pixelOffset = (x + (height - y - 1) * width) * 4;
-          const color = SPECTRUM_UI_COLORS[loudness];
+          const color = colors[loudness];
           imageData.data.set(color, pixelOffset);
         }
       }
@@ -109,17 +116,18 @@ export const createAudioFileSpectrumRenderer = (
     update();
   };
 
-  const destroy = createCanvasResizeObserver(canvas, () => {
+  const destroy = () => {
     rendering = false;
-    void render();
-  });
+    emit('destroy');
+  };
 
   const resize = (width: number, height: number) => {
     canvas.width = width;
     canvas.height = height;
+    void render();
   };
 
-  return { name, analyzerOptions, resize, render, destroy };
+  return { on, off, name, analyzerOptions, resize, render, destroy };
 };
 
 export type AudioFileSpectrumRenderer = ReturnType<

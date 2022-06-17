@@ -18,6 +18,7 @@ import { resolveRealCanvasSize } from '@utils/resizeAndClearCanvas';
 import { FunctionalComponent } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import prettyBytes from 'pretty-bytes';
+import { SPECTRUM_BACKGROUND, SPECTRUM_UI_COLORS } from '../../../constants';
 import styles from './Canvas.module.scss';
 
 const margin: Margin = { top: 35, right: 100, bottom: 35, left: 65 };
@@ -126,18 +127,20 @@ export const Canvas: FunctionalComponent = () => {
 
     switch (store.state.renderer?.type) {
       case 'realtime':
-        const realtime = createRealtimeSpectrumRenderer((data) => {
-          const sampleRateText = data.audioContext.sampleRate.toLocaleString();
+        const realtime = createRealtimeSpectrumRenderer(
+          SPECTRUM_UI_COLORS,
+          SPECTRUM_BACKGROUND
+        );
 
+        realtime.on('update', (data) => {
+          const sampleRateText = data.audioContext.sampleRate.toLocaleString();
           const bufferText = prettyBytes(data.bufferSize, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           });
 
-          const text = `Recording with a sample-rate of ${sampleRateText} (Buffer: ${bufferText})`;
-
           renderUi(
-            text,
+            `Recording with a sample-rate of ${sampleRateText} (Buffer: ${bufferText})`,
             data.canvas,
             data.time,
             data.audioAnalyzer,
@@ -149,18 +152,18 @@ export const Canvas: FunctionalComponent = () => {
         void realtime.start();
         break;
       case 'file':
-        const file = createAudioFileSpectrumRenderer((data) => {
+        const file = createAudioFileSpectrumRenderer(SPECTRUM_UI_COLORS);
+
+        file.on('update', (data) => {
+          const buffer = data.audioBuffer;
+          const file = data.audioFile;
           const sampleRate = data.audioContext.sampleRate.toLocaleString();
-          const bitrate =
-            (data.audioBuffer.length / data.audioBuffer.duration) * 8;
-          const text = `${data.audioFile.name} (${
-            data.audioFile.type
-          }, ${sampleRate} Hz, ${bitrate / 1000}kbps, ${
-            data.audioBuffer.numberOfChannels
-          } channels)`;
+          const bitrate = (buffer.length / buffer.duration) * 8;
 
           renderUi(
-            text,
+            `${file.name} (${file.type}, ${sampleRate} Hz, ${
+              bitrate / 1000
+            }kbps, ${buffer.numberOfChannels} channels)`,
             data.canvas,
             { start: 0, end: data.audioBuffer.duration },
             data.audioAnalyzer,

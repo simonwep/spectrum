@@ -1,9 +1,8 @@
-import { SPECTRUM_BACKGROUND, SPECTRUM_UI_COLORS } from '../../../constants';
 import {
   CancelNextFrameLoop,
   createCanvas,
   eachFrame,
-  createCanvasResizeObserver,
+  createEventBus,
 } from '../utils';
 
 export interface TimeFrame {
@@ -19,6 +18,13 @@ export interface RealtimeSpectrumRendererUpdate {
   bufferSize: number;
 }
 
+export interface RealtimeSpectrumRendererEvents {
+  start: void;
+  stop: void;
+  destroy: void;
+  update: RealtimeSpectrumRendererUpdate;
+}
+
 interface Frame {
   buffer: Uint8Array;
   at: number;
@@ -28,9 +34,11 @@ const FREQUENCY_RANGE = 28_000;
 const name = 'RealtimeSpectrumRenderer';
 
 export const createRealtimeSpectrumRenderer = (
-  onUpdate: (update: RealtimeSpectrumRendererUpdate) => void
+  colors: Uint8ClampedArray[],
+  background: Uint8ClampedArray
 ) => {
   const [canvas, context] = createCanvas();
+  const { on, off, emit } = createEventBus<RealtimeSpectrumRendererEvents>();
 
   let rendering = false;
   let audioContext: AudioContext | undefined;
@@ -57,12 +65,13 @@ export const createRealtimeSpectrumRenderer = (
 
   const update = () => {
     if (audioContext && audioAnalyzer) {
-      onUpdate({ canvas, time, audioContext, audioAnalyzer, bufferSize });
+      emit('update', { canvas, time, audioContext, audioAnalyzer, bufferSize });
     }
   };
 
-  const destroyCanvasResizeObserver = createCanvasResizeObserver(canvas, () => {
-    const { width, height } = canvas;
+  const resize = (width: number, height: number) => {
+    canvas.width = width;
+    canvas.height = height;
 
     if (!rendering || !frames.length) {
       return;
@@ -79,33 +88,35 @@ export const createRealtimeSpectrumRenderer = (
       const loudness = frame.buffer[Math.floor(row * slice)];
 
       if (loudness) {
-        const color = SPECTRUM_UI_COLORS[loudness];
+        const color = colors[loudness];
         spectrum.data.set(color, i);
       } else {
-        spectrum.data.set(SPECTRUM_BACKGROUND, i);
+        spectrum.data.set(background, i);
       }
     }
 
     offset = Math.min(view.length - 1);
     context.putImageData(spectrum, 0, 0);
     update();
-  });
+  };
 
   const destroy = async () => {
-    destroyCanvasResizeObserver();
     await stop();
+    emit('destroy');
   };
 
   const stop = async () => {
     stopRendering?.();
     await audioContext?.close();
     audioContext = undefined;
+    emit('stop');
   };
 
   const start = async () => {
     if (rendering) return;
     const start = performance.now();
     rendering = true;
+    emit('start');
 
     // Get user media and create media recorder
     const media = await navigator.mediaDevices.getUserMedia({
@@ -140,10 +151,10 @@ export const createRealtimeSpectrumRenderer = (
         const offset = (height - y - 1) * 4;
 
         if (loudness) {
-          const color = SPECTRUM_UI_COLORS[loudness];
+          const color = colors[loudness];
           spectrum.data.set(color, offset);
         } else {
-          spectrum.data.set(SPECTRUM_BACKGROUND, offset);
+          spectrum.data.set(background, offset);
         }
       }
 
@@ -169,12 +180,7 @@ export const createRealtimeSpectrumRenderer = (
     });
   };
 
-  const resize = (width: number, height: number) => {
-    canvas.width = width;
-    canvas.height = height;
-  };
-
-  return { name, analyzerOptions, resize, start, stop, destroy };
+  return { on, off, name, analyzerOptions, resize, start, stop, destroy };
 };
 
 export type RealtimeSpectrumRenderer = ReturnType<
