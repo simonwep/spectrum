@@ -18,7 +18,7 @@ export const renderFrequencyBand = ({
   context,
   margin,
   layout,
-  sampleRate = 48000,
+  sampleRate = 96_000,
 }: FrequencyBandOptions) => {
   const rect = applyMargin(context.canvas, margin);
   const outerBoxHeight = rect.height + 1;

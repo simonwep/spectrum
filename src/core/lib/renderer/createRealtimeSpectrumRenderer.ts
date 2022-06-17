@@ -1,8 +1,8 @@
 import {
   CancelNextFrameLoop,
   createCanvas,
-  eachFrame,
   createEventBus,
+  eachFrame,
 } from '../utils';
 
 export interface TimeFrame {
@@ -30,7 +30,7 @@ interface Frame {
   at: number;
 }
 
-const FREQUENCY_RANGE = 28_000;
+const FREQUENCY_RANGE = 96_000;
 const name = 'RealtimeSpectrumRenderer';
 
 export const createRealtimeSpectrumRenderer = (
@@ -102,6 +102,9 @@ export const createRealtimeSpectrumRenderer = (
 
   const destroy = async () => {
     await stop();
+    await audioContext?.close();
+    audioAnalyzer = undefined;
+    audioContext = undefined;
     emit('destroy');
   };
 
@@ -122,9 +125,9 @@ export const createRealtimeSpectrumRenderer = (
     });
 
     // Create context and analyzer node
-    await audioContext?.close();
+    audioContext?.close();
     audioContext = new AudioContext({
-      sampleRate: FREQUENCY_RANGE * 2,
+      sampleRate: FREQUENCY_RANGE,
     });
 
     // Connect analyzer node

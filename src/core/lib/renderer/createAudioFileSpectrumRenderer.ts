@@ -13,6 +13,7 @@ export interface AudioFileSpectrumRendererEvents {
   update: AudioFileSpectrumRendererUpdate;
 }
 
+const FREQUENCY_RANGE = 96_000;
 const name = 'AudioFileSpectrumRenderer';
 
 export const createAudioFileSpectrumRenderer = (
@@ -60,7 +61,9 @@ export const createAudioFileSpectrumRenderer = (
     if (state.rendering || !file) return;
     state.rendering = true;
     audioFile = file;
-    audioBuffer = await createAudioBuffer(file);
+    audioBuffer = await createAudioBuffer(file, {
+      sampleRate: FREQUENCY_RANGE,
+    });
 
     const { width, height } = canvas;
     const frames: Uint8Array[] = new Array(width);

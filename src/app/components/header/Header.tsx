@@ -29,7 +29,6 @@ export const Header: FunctionalComponent = () => {
   const toggleRecording = () => {
     const instance = store.state.rendererInstance as RealtimeSpectrumRenderer;
 
-    console.log(instance);
     if (instance?.name === 'RealtimeSpectrumRenderer') {
       if (instance.state.rendering) {
         instance.stop();

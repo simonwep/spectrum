@@ -99,16 +99,9 @@ export const Canvas: FunctionalComponent = () => {
     canvas.current.width = width;
     canvas.current.height = height;
 
-    if (renderer) {
-      renderer?.resize(width - left - right, height - top - bottom);
-    } else {
-      renderUi('Record audio or select an file to analyze...');
-    }
+    renderUi('Record audio or select an file to analyze...');
+    renderer?.resize(width - left - right, height - top - bottom);
   };
-
-  useEffect(() => {
-    resize();
-  }, [context]);
 
   useEffect(() => {
     resize();
