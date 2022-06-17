@@ -172,6 +172,9 @@ export const Canvas: FunctionalComponent = () => {
         store.setRendererInstance(file);
         void file.render(store.state.renderer.file);
         break;
+      default:
+        setRenderer(undefined);
+        resize();
     }
   }, [store.state.renderer, context]);
 

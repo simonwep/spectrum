@@ -31,9 +31,9 @@ export const Header: FunctionalComponent = () => {
 
     if (instance?.name === 'RealtimeSpectrumRenderer') {
       if (instance.state.rendering) {
-        instance.stop();
+        void instance.stop();
       } else {
-        instance.start();
+        void instance.start();
       }
     }
   };
