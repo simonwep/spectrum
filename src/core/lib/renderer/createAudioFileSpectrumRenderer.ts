@@ -9,6 +9,8 @@ export interface AudioFileSpectrumRendererUpdate {
 }
 
 export interface AudioFileSpectrumRendererEvents {
+  play: void;
+  pause: void;
   destroy: void;
   update: AudioFileSpectrumRendererUpdate;
 }
@@ -22,11 +24,15 @@ export const createAudioFileSpectrumRenderer = (
   const [canvas, context] = createCanvas();
   const { on, off, emit } = createEventBus<AudioFileSpectrumRendererEvents>();
 
-  const state = { rendering: false };
+  const state = { rendering: false, playing: false };
   let audioContext: OfflineAudioContext | undefined;
   let audioAnalyzer: AnalyserNode | undefined;
   let audioBuffer: AudioBuffer | undefined;
   let audioFile: File | undefined;
+  let audioFileUrl: string | undefined;
+  let imageData: ImageData | undefined;
+  let audio: HTMLAudioElement | undefined;
+  let schedulePlaying = false;
 
   const analyzerOptions: Required<
     Pick<
@@ -59,7 +65,17 @@ export const createAudioFileSpectrumRenderer = (
 
   const render = async (file = audioFile) => {
     if (state.rendering || !file) return;
+
+    audioFileUrl && URL.revokeObjectURL(audioFileUrl);
+    audio?.pause();
+    emit('pause');
+
+    audio = undefined;
+    audioFileUrl = undefined;
+
+    state.playing = false;
     state.rendering = true;
+
     audioFile = file;
     audioBuffer = await createAudioBuffer(file, {
       sampleRate: FREQUENCY_RANGE,
@@ -98,7 +114,7 @@ export const createAudioFileSpectrumRenderer = (
     await audioContext.startRendering();
 
     // Render spectrum
-    const imageData = new ImageData(width, height);
+    imageData = new ImageData(width, height);
     for (let x = 0; x < width; x++) {
       const frame = frames[x];
 
@@ -117,6 +133,53 @@ export const createAudioFileSpectrumRenderer = (
     context.putImageData(imageData, 0, 0);
     state.rendering = false;
     update();
+
+    if (schedulePlaying) {
+      await play();
+    }
+  };
+
+  const play = async () => {
+    if (state.rendering) {
+      schedulePlaying = true;
+      return;
+    } else if (!audioFile || !imageData || state.playing) {
+      return;
+    }
+
+    audioFileUrl = audioFileUrl ?? URL.createObjectURL(audioFile);
+    audio = audio ?? new Audio(audioFileUrl);
+    audio.volume = 0;
+
+    audio.addEventListener('timeupdate', () => {
+      if (!imageData || !audio) return;
+      context.putImageData(imageData, 0, 0);
+
+      const x = Math.floor((audio.currentTime / audio.duration) * canvas.width);
+      if (x) {
+        context.fillStyle = 'white';
+        context.fillRect(x, 0, 1, canvas.height);
+      }
+
+      update();
+    });
+
+    await audio.play();
+    state.playing = true;
+    schedulePlaying = false;
+    emit('play');
+  };
+
+  const pause = () => {
+    audio?.pause();
+    state.playing = false;
+    schedulePlaying = false;
+    audioFileUrl && URL.revokeObjectURL(audioFileUrl);
+    emit('pause');
+  };
+
+  const rewind = () => {
+    audio && (audio.currentTime = 0);
   };
 
   const destroy = () => {
@@ -130,8 +193,25 @@ export const createAudioFileSpectrumRenderer = (
     void render();
   };
 
-  return { state, on, off, name, analyzerOptions, resize, render, destroy };
+  return {
+    state,
+    on,
+    off,
+    name,
+    analyzerOptions,
+    resize,
+    render,
+    destroy,
+    play,
+    pause,
+    rewind,
+  };
 };
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export const isAudioFileSpectrumRenderer = (
+  v: any
+): v is AudioFileSpectrumRenderer => typeof v === 'object' && v?.name === name;
 
 export type AudioFileSpectrumRenderer = ReturnType<
   typeof createAudioFileSpectrumRenderer

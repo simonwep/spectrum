@@ -1,9 +1,4 @@
-import {
-  CancelNextFrameLoop,
-  createCanvas,
-  createEventBus,
-  eachFrame,
-} from '../utils';
+import { CancelNextFrameLoop, createCanvas, createEventBus, eachFrame } from '../utils';
 
 export interface TimeFrame {
   start: number;
@@ -33,10 +28,7 @@ interface Frame {
 const FREQUENCY_RANGE = 96_000;
 const name = 'RealtimeSpectrumRenderer';
 
-export const createRealtimeSpectrumRenderer = (
-  colors: Uint8ClampedArray[],
-  background: Uint8ClampedArray
-) => {
+export const createRealtimeSpectrumRenderer = (colors: Uint8ClampedArray[], background: Uint8ClampedArray) => {
   const [canvas, context] = createCanvas();
   const { on, off, emit } = createEventBus<RealtimeSpectrumRendererEvents>();
 
@@ -46,10 +38,7 @@ export const createRealtimeSpectrumRenderer = (
   let stopRendering: CancelNextFrameLoop | undefined;
 
   const analyzerOptions: Required<
-    Pick<
-      AnalyserOptions,
-      'smoothingTimeConstant' | 'fftSize' | 'minDecibels' | 'maxDecibels'
-    >
+    Pick<AnalyserOptions, 'smoothingTimeConstant' | 'fftSize' | 'minDecibels' | 'maxDecibels'>
   > = {
     smoothingTimeConstant: 0,
     fftSize: 2 ** 12,
@@ -160,9 +149,7 @@ export const createRealtimeSpectrumRenderer = (
         }
       }
 
-      const averageTimePerFrame = frames.length
-        ? (frames.at(-1)?.at ?? 0) / 1000 / frames.length
-        : 0;
+      const averageTimePerFrame = frames.length ? (frames.at(-1)?.at ?? 0) / 1000 / frames.length : 0;
 
       if (offset === width - 1) {
         context.globalCompositeOperation = 'copy';
@@ -197,6 +184,8 @@ export const createRealtimeSpectrumRenderer = (
   };
 };
 
-export type RealtimeSpectrumRenderer = ReturnType<
-  typeof createRealtimeSpectrumRenderer
->;
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export const isRealtimeSpectrumRenderer = (v: any): v is RealtimeSpectrumRenderer =>
+  typeof v === 'object' && v?.name === name;
+
+export type RealtimeSpectrumRenderer = ReturnType<typeof createRealtimeSpectrumRenderer>;
