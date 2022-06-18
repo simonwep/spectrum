@@ -1,3 +1,4 @@
+import { Slider } from '@components/slider/Slider';
 import {
   isAudioFileSpectrumRenderer,
   isRealtimeSpectrumRenderer,
@@ -12,6 +13,7 @@ import styles from './Header.module.scss';
 export const Header: FunctionalComponent = () => {
   const [recording, setRecording] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const [volume, setVolume] = useState(0.6);
   const store = useStore();
 
   const reset = () => {
@@ -65,8 +67,13 @@ export const Header: FunctionalComponent = () => {
     const instance = store.state.rendererInstance;
 
     if (isAudioFileSpectrumRenderer(instance)) {
-      instance.on('play', () => setPlaying(true));
       instance.on('pause', () => setPlaying(false));
+
+      instance.on('play', () => {
+        setPlaying(true);
+        instance.setVolume(volume);
+      });
+
       setPlaying(instance.state.playing);
     } else if (isRealtimeSpectrumRenderer(instance)) {
       instance.on('start', () => setRecording(true));
@@ -74,6 +81,14 @@ export const Header: FunctionalComponent = () => {
       setRecording(instance.state.rendering);
     }
   }, [store.state.rendererInstance]);
+
+  useEffect(() => {
+    const instance = store.state.rendererInstance;
+
+    if (isAudioFileSpectrumRenderer(instance)) {
+      instance.setVolume(volume);
+    }
+  }, [volume, store.state.rendererInstance]);
 
   return (
     <div className={styles.header}>
@@ -101,6 +116,7 @@ export const Header: FunctionalComponent = () => {
           <button onClick={rewind}>
             <Icon icon="reset" />
           </button>
+          <Slider value={volume} onChange={setVolume} />
         </>
       )}
 

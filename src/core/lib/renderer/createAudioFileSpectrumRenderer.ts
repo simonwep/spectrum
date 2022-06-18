@@ -182,6 +182,10 @@ export const createAudioFileSpectrumRenderer = (
     audio && (audio.currentTime = 0);
   };
 
+  const setVolume = (volume: number) => {
+    audio && (audio.volume = volume);
+  };
+
   const destroy = () => {
     state.rendering = false;
     emit('destroy');
@@ -205,6 +209,7 @@ export const createAudioFileSpectrumRenderer = (
     play,
     pause,
     rewind,
+    setVolume,
   };
 };
 
