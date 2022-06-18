@@ -1,6 +1,6 @@
-import { icons } from './icons';
 import { FunctionalComponent } from 'preact';
 import styles from './Icon.module.scss';
+import { icons } from './icons';
 
 interface Props {
   icon: keyof typeof icons;

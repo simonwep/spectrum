@@ -1,4 +1,9 @@
-import { CancelNextFrameLoop, createCanvas, createEventBus, eachFrame } from '../utils';
+import {
+  CancelNextFrameLoop,
+  createCanvas,
+  createEventBus,
+  eachFrame,
+} from '../utils';
 
 export interface TimeFrame {
   start: number;
@@ -28,17 +33,23 @@ interface Frame {
 const FREQUENCY_RANGE = 96_000;
 const name = 'RealtimeSpectrumRenderer';
 
-export const createRealtimeSpectrumRenderer = (colors: Uint8ClampedArray[], background: Uint8ClampedArray) => {
+export const createRealtimeSpectrumRenderer = (
+  colors: Uint8ClampedArray[],
+  background: Uint8ClampedArray
+) => {
   const [canvas, context] = createCanvas();
   const { on, off, emit } = createEventBus<RealtimeSpectrumRendererEvents>();
 
-  const state = { rendering: false };
+  let recording = false;
   let audioContext: AudioContext | undefined;
   let audioAnalyzer: AnalyserNode | undefined;
   let stopRendering: CancelNextFrameLoop | undefined;
 
   const analyzerOptions: Required<
-    Pick<AnalyserOptions, 'smoothingTimeConstant' | 'fftSize' | 'minDecibels' | 'maxDecibels'>
+    Pick<
+      AnalyserOptions,
+      'smoothingTimeConstant' | 'fftSize' | 'minDecibels' | 'maxDecibels'
+    >
   > = {
     smoothingTimeConstant: 0,
     fftSize: 2 ** 12,
@@ -94,19 +105,20 @@ export const createRealtimeSpectrumRenderer = (colors: Uint8ClampedArray[], back
     await audioContext?.close();
     audioAnalyzer = undefined;
     audioContext = undefined;
+    recording = false;
     emit('destroy');
   };
 
   const stop = async () => {
-    state.rendering = false;
+    recording = false;
     stopRendering?.();
     emit('stop');
   };
 
   const start = async () => {
-    if (state.rendering) return;
+    if (recording) return;
     const start = performance.now();
-    state.rendering = true;
+    recording = true;
 
     // Get user media and create media recorder
     const media = await navigator.mediaDevices.getUserMedia({
@@ -114,7 +126,7 @@ export const createRealtimeSpectrumRenderer = (colors: Uint8ClampedArray[], back
     });
 
     // Create context and analyzer node
-    audioContext?.close();
+    await audioContext?.close();
     audioContext = new AudioContext({
       sampleRate: FREQUENCY_RANGE,
     });
@@ -149,7 +161,9 @@ export const createRealtimeSpectrumRenderer = (colors: Uint8ClampedArray[], back
         }
       }
 
-      const averageTimePerFrame = frames.length ? (frames.at(-1)?.at ?? 0) / 1000 / frames.length : 0;
+      const averageTimePerFrame = frames.length
+        ? (frames.at(-1)?.at ?? 0) / 1000 / frames.length
+        : 0;
 
       if (offset === width - 1) {
         context.globalCompositeOperation = 'copy';
@@ -172,7 +186,6 @@ export const createRealtimeSpectrumRenderer = (colors: Uint8ClampedArray[], back
   };
 
   return {
-    state,
     on,
     off,
     name,
@@ -181,11 +194,15 @@ export const createRealtimeSpectrumRenderer = (colors: Uint8ClampedArray[], back
     start,
     stop,
     destroy,
+    isRecording: () => recording,
   };
 };
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export const isRealtimeSpectrumRenderer = (v: any): v is RealtimeSpectrumRenderer =>
-  typeof v === 'object' && v?.name === name;
+export const isRealtimeSpectrumRenderer = (
+  v: any
+): v is RealtimeSpectrumRenderer => typeof v === 'object' && v?.name === name;
 
-export type RealtimeSpectrumRenderer = ReturnType<typeof createRealtimeSpectrumRenderer>;
+export type RealtimeSpectrumRenderer = ReturnType<
+  typeof createRealtimeSpectrumRenderer
+>;

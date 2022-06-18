@@ -1,8 +1,6 @@
 import {
-  AudioFileSpectrumRenderer,
-  createAudioFileSpectrumRenderer,
-  createRealtimeSpectrumRenderer,
-  RealtimeSpectrumRenderer,
+  isAudioFileSpectrumRenderer,
+  isRealtimeSpectrumRenderer,
   TimeFrame,
 } from '@core/lib/renderer';
 import { DecibelBarVisuals, renderDecibelBar } from '@core/ui/renderDecibelBar';
@@ -18,7 +16,7 @@ import { resolveRealCanvasSize } from '@utils/resizeAndClearCanvas';
 import { FunctionalComponent } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import prettyBytes from 'pretty-bytes';
-import { SPECTRUM_BACKGROUND, SPECTRUM_UI_COLORS } from '../../../constants';
+import { prettyDuration } from '../../../utils/prettyDuration';
 import styles from './Canvas.module.scss';
 
 const margin: Margin = { top: 35, right: 100, bottom: 35, left: 65 };
@@ -32,10 +30,6 @@ const decibelBarLayout: DecibelBarVisuals = { ...ticksLayout, width: 10 };
 const frequencyBandLayout: FrequencyBandVisuals = { ...ticksLayout };
 
 export const Canvas: FunctionalComponent = () => {
-  const [renderer, setRenderer] = useState<
-    AudioFileSpectrumRenderer | RealtimeSpectrumRenderer
-  >();
-
   const [context, setContext] = useState<CanvasRenderingContext2D>();
   const canvas = useRef<HTMLCanvasElement | null>(null);
   const store = useStore();
@@ -99,8 +93,16 @@ export const Canvas: FunctionalComponent = () => {
     canvas.current.width = width;
     canvas.current.height = height;
 
-    renderUi('Record audio or select an file to analyze...');
-    renderer?.resize(width - left - right, height - top - bottom);
+    renderUi(
+      store.state.renderer
+        ? 'Loading...'
+        : 'Record audio or select an file to analyze...'
+    );
+
+    store.state.rendererInstance?.resize(
+      width - left - right,
+      height - top - bottom
+    );
   };
 
   useEffect(() => {
@@ -119,64 +121,52 @@ export const Canvas: FunctionalComponent = () => {
 
   useEffect(() => {
     if (!context) return;
-    renderer?.destroy();
+    const instance = store.state.rendererInstance;
 
-    switch (store.state.renderer?.type) {
-      case 'realtime':
-        const realtime = createRealtimeSpectrumRenderer(
-          SPECTRUM_UI_COLORS,
-          SPECTRUM_BACKGROUND
+    if (isRealtimeSpectrumRenderer(instance)) {
+      instance.on('update', (data) => {
+        const sampleRateText = data.audioContext.sampleRate.toLocaleString();
+        const bufferText = prettyBytes(data.bufferSize, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+
+        renderUi(
+          `Recording with a sample-rate of ${sampleRateText} (Buffer: ${bufferText})`,
+          data.canvas,
+          data.time,
+          data.audioAnalyzer,
+          data.audioContext
         );
+      });
+    } else if (isAudioFileSpectrumRenderer(instance)) {
+      instance.on('update', (data) => {
+        const { length, duration, numberOfChannels } = data.audioBuffer;
+        const { name, type } = data.audioFile;
+        const { currentTime } = data.audio ?? { currentTime: 0 };
+        const sampleRate = data.audioContext.sampleRate.toLocaleString();
+        const bitrate = ((length / duration) * 8) / 1000;
 
-        realtime.on('update', (data) => {
-          const sampleRateText = data.audioContext.sampleRate.toLocaleString();
-          const bufferText = prettyBytes(data.bufferSize, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          });
+        const text =
+          `${name} (${type}, ${sampleRate} Hz, ${bitrate}kbps, ${numberOfChannels} channels)` +
+          (data.audio
+            ? ` (playing - ${prettyDuration(currentTime)} / ${prettyDuration(
+                duration
+              )})`
+            : '');
 
-          renderUi(
-            `Recording with a sample-rate of ${sampleRateText} (Buffer: ${bufferText})`,
-            data.canvas,
-            data.time,
-            data.audioAnalyzer,
-            data.audioContext
-          );
-        });
-
-        setRenderer(realtime);
-        store.setRendererInstance(realtime);
-        void realtime.start();
-        break;
-      case 'file':
-        const file = createAudioFileSpectrumRenderer(SPECTRUM_UI_COLORS);
-
-        file.on('update', (data) => {
-          const buffer = data.audioBuffer;
-          const file = data.audioFile;
-          const sampleRate = data.audioContext.sampleRate.toLocaleString();
-          const bitrate = (buffer.length / buffer.duration) * 8;
-
-          renderUi(
-            `${file.name} (${file.type}, ${sampleRate} Hz, ${
-              bitrate / 1000
-            }kbps, ${buffer.numberOfChannels} channels)`,
-            data.canvas,
-            { start: 0, end: data.audioBuffer.duration },
-            data.audioAnalyzer,
-            data.audioContext
-          );
-        });
-
-        setRenderer(file);
-        store.setRendererInstance(file);
-        void file.render(store.state.renderer.file);
-        break;
-      default:
-        setRenderer(undefined);
-        resize();
+        renderUi(
+          text,
+          data.canvas,
+          { start: 0, end: data.audioBuffer.duration },
+          data.audioAnalyzer,
+          data.audioContext
+        );
+      });
+    } else {
+      resize();
     }
-  }, [store.state.renderer, context]);
+  }, [store.state.rendererInstance]);
 
   return (
     <div className={styles.canvas} style="color: red">

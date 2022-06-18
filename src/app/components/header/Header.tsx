@@ -11,13 +11,14 @@ import { Icon } from '../icon/Icon';
 import styles from './Header.module.scss';
 
 export const Header: FunctionalComponent = () => {
+  const [rendering, setRendering] = useState(false);
   const [recording, setRecording] = useState(false);
   const [playing, setPlaying] = useState(false);
-  const [volume, setVolume] = useState(0.6);
+  const [volume, setVolume] = useState(0.2);
   const store = useStore();
 
   const reset = () => {
-    store.setRenderer(undefined);
+    void store.changeRenderer(undefined);
   };
 
   const openFile = () => {
@@ -25,7 +26,7 @@ export const Header: FunctionalComponent = () => {
       multiple: false,
       accept: 'audio/*',
     }).then((file) => {
-      store.setRenderer({ file, type: 'file' });
+      void store.changeRenderer({ file, type: 'file' });
     });
   };
 
@@ -33,13 +34,13 @@ export const Header: FunctionalComponent = () => {
     const instance = store.state.rendererInstance;
 
     if (isRealtimeSpectrumRenderer(instance)) {
-      if (instance.state.rendering) {
+      if (instance.isRecording()) {
         void instance.stop();
       } else {
         void instance.start();
       }
     } else {
-      store.setRenderer({ type: 'realtime' });
+      void store.changeRenderer({ type: 'realtime' });
     }
   };
 
@@ -47,13 +48,13 @@ export const Header: FunctionalComponent = () => {
     const instance = store.state.rendererInstance;
 
     if (isAudioFileSpectrumRenderer(instance)) {
-      if (instance.state.playing) {
+      if (instance.isPlaying()) {
         void instance.pause();
       } else {
         void instance.play();
       }
     } else {
-      store.setRenderer({ type: 'realtime' });
+      void store.changeRenderer({ type: 'realtime' });
     }
   };
 
@@ -68,19 +69,19 @@ export const Header: FunctionalComponent = () => {
 
     if (isAudioFileSpectrumRenderer(instance)) {
       instance.on('pause', () => setPlaying(false));
-
-      instance.on('play', () => {
-        setPlaying(true);
-        instance.setVolume(volume);
-      });
-
-      setPlaying(instance.state.playing);
+      instance.on('beforePlay', () => instance.setVolume(volume));
+      instance.on('play', () => setPlaying(true));
+      instance.on('start', () => setRendering(true));
+      instance.on('stop', () => setRendering(false));
+      setPlaying(instance.isPlaying());
+      setRendering(instance.isRendering());
     } else if (isRealtimeSpectrumRenderer(instance)) {
       instance.on('start', () => setRecording(true));
       instance.on('stop', () => setRecording(false));
-      setRecording(instance.state.rendering);
+      setRecording(instance.isRecording());
+      setRendering(instance.isRecording());
     }
-  }, [store.state.rendererInstance]);
+  }, [store.state.rendererInstance?.name]);
 
   useEffect(() => {
     const instance = store.state.rendererInstance;
@@ -88,7 +89,7 @@ export const Header: FunctionalComponent = () => {
     if (isAudioFileSpectrumRenderer(instance)) {
       instance.setVolume(volume);
     }
-  }, [volume, store.state.rendererInstance]);
+  }, [volume]);
 
   return (
     <div className={styles.header}>
@@ -108,7 +109,7 @@ export const Header: FunctionalComponent = () => {
         />
       </button>
 
-      {store.state.renderer?.type === 'file' && (
+      {store.state.renderer?.type === 'file' && !rendering && (
         <>
           <button onClick={togglePlaying}>
             <Icon icon={playing ? 'pause' : 'play'} />

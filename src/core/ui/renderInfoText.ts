@@ -1,4 +1,4 @@
-import { Margin } from './/utils';
+import { Margin } from './utils';
 
 export interface InfoTextOptions {
   context: CanvasRenderingContext2D;

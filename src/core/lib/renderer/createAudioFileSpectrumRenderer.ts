@@ -6,11 +6,15 @@ export interface AudioFileSpectrumRendererUpdate {
   audioAnalyzer: AnalyserNode;
   audioBuffer: AudioBuffer;
   audioFile: File;
+  audio: HTMLAudioElement | undefined;
 }
 
 export interface AudioFileSpectrumRendererEvents {
+  beforePlay: void;
   play: void;
   pause: void;
+  start: void;
+  stop: void;
   destroy: void;
   update: AudioFileSpectrumRendererUpdate;
 }
@@ -24,7 +28,8 @@ export const createAudioFileSpectrumRenderer = (
   const [canvas, context] = createCanvas();
   const { on, off, emit } = createEventBus<AudioFileSpectrumRendererEvents>();
 
-  const state = { rendering: false, playing: false };
+  let rendering = false;
+  let playing = false;
   let audioContext: OfflineAudioContext | undefined;
   let audioAnalyzer: AnalyserNode | undefined;
   let audioBuffer: AudioBuffer | undefined;
@@ -32,18 +37,6 @@ export const createAudioFileSpectrumRenderer = (
   let audioFileUrl: string | undefined;
   let imageData: ImageData | undefined;
   let audio: HTMLAudioElement | undefined;
-  let schedulePlaying = false;
-
-  const analyzerOptions: Required<
-    Pick<
-      AnalyserOptions,
-      'smoothingTimeConstant' | 'minDecibels' | 'maxDecibels'
-    >
-  > = {
-    smoothingTimeConstant: 0,
-    minDecibels: -120,
-    maxDecibels: -20,
-  };
 
   const calculateFftSize = (height: number) => {
     let fftSize = 2;
@@ -59,22 +52,23 @@ export const createAudioFileSpectrumRenderer = (
         audioContext,
         audioAnalyzer,
         audioBuffer,
+        audio,
       });
     }
   };
 
   const render = async (file = audioFile) => {
-    if (state.rendering || !file) return;
-
+    if (rendering || !file) return;
     audioFileUrl && URL.revokeObjectURL(audioFileUrl);
     audio?.pause();
     emit('pause');
+    emit('start');
 
     audio = undefined;
     audioFileUrl = undefined;
 
-    state.playing = false;
-    state.rendering = true;
+    playing = false;
+    rendering = true;
 
     audioFile = file;
     audioBuffer = await createAudioBuffer(file, {
@@ -87,10 +81,11 @@ export const createAudioFileSpectrumRenderer = (
 
     // Create analyzer node
     audioAnalyzer = audioContext.createAnalyser();
+    audioAnalyzer.connect(audioContext.destination);
     audioAnalyzer.fftSize = calculateFftSize(height);
     audioAnalyzer.smoothingTimeConstant = 0;
-    audioAnalyzer.connect(audioContext.destination);
-    Object.assign(audioAnalyzer, analyzerOptions);
+    audioAnalyzer.minDecibels = -120;
+    audioAnalyzer.maxDecibels = -20;
 
     // Render all frames
     const frameSize = audioBuffer.duration / frames.length;
@@ -131,25 +126,19 @@ export const createAudioFileSpectrumRenderer = (
 
     // Put on canvas
     context.putImageData(imageData, 0, 0);
-    state.rendering = false;
+    rendering = false;
+    emit('stop');
     update();
-
-    if (schedulePlaying) {
-      await play();
-    }
   };
 
   const play = async () => {
-    if (state.rendering) {
-      schedulePlaying = true;
-      return;
-    } else if (!audioFile || !imageData || state.playing) {
+    if (rendering || !audioFile || !imageData || playing) {
       return;
     }
 
     audioFileUrl = audioFileUrl ?? URL.createObjectURL(audioFile);
     audio = audio ?? new Audio(audioFileUrl);
-    audio.volume = 0;
+    emit('beforePlay');
 
     audio.addEventListener('timeupdate', () => {
       if (!imageData || !audio) return;
@@ -165,15 +154,13 @@ export const createAudioFileSpectrumRenderer = (
     });
 
     await audio.play();
-    state.playing = true;
-    schedulePlaying = false;
+    playing = true;
     emit('play');
   };
 
   const pause = () => {
     audio?.pause();
-    state.playing = false;
-    schedulePlaying = false;
+    playing = false;
     audioFileUrl && URL.revokeObjectURL(audioFileUrl);
     emit('pause');
   };
@@ -187,7 +174,8 @@ export const createAudioFileSpectrumRenderer = (
   };
 
   const destroy = () => {
-    state.rendering = false;
+    pause();
+    rendering = false;
     emit('destroy');
   };
 
@@ -198,11 +186,9 @@ export const createAudioFileSpectrumRenderer = (
   };
 
   return {
-    state,
     on,
     off,
     name,
-    analyzerOptions,
     resize,
     render,
     destroy,
@@ -210,6 +196,8 @@ export const createAudioFileSpectrumRenderer = (
     pause,
     rewind,
     setVolume,
+    isPlaying: () => playing,
+    isRendering: () => rendering,
   };
 };
 
