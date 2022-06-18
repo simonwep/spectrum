@@ -28,6 +28,6 @@ export const createEventBus = <M extends Record<string, any>>() => {
 
     unbindAll() {
       listeners.clear();
-    }
+    },
   };
 };

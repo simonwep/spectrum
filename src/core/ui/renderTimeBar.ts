@@ -14,6 +14,7 @@ export interface TimeBarOptions {
   time: TimeFrame;
   margin: Margin;
   layout: TimeBarVisuals;
+  currentTime?: number;
 }
 
 export const renderTimeBar = ({
@@ -21,6 +22,7 @@ export const renderTimeBar = ({
   time,
   layout,
   margin,
+  currentTime,
 }: TimeBarOptions) => {
   const rect = applyMargin(context.canvas, margin);
   const duration = time.end - time.start;
@@ -36,14 +38,31 @@ export const renderTimeBar = ({
   context.textBaseline = 'hanging';
   context.font = '12px monospace';
 
+  const usedSpace: [number, number][] = [];
   for (let i = 0; i <= ticks; i++) {
     const x = rect.left + i * spacing - 1;
-    const text = prettyDuration(
-      Math.floor(time.start + (i / ticks) * duration)
-    );
+    const text = prettyDuration(time.start + (i / ticks) * duration);
 
     // Tick
     context.fillRect(x, rect.bottom, layout.tickThickness, layout.tickLength);
     context.fillText(text, x, rect.bottom + layout.tickLength + 2);
+    usedSpace.push([x, x + context.measureText(text).width]);
+  }
+
+  // Current time
+  if (currentTime !== undefined) {
+    const x = Math.floor(rect.left + (currentTime / duration) * outerBoxWidth);
+    const y = rect.bottom + 1;
+    const h = layout.tickLength / 2;
+
+    context.fillStyle = 'white';
+    context.fillRect(x, y, layout.tickThickness, h);
+
+    const text = prettyDuration(currentTime);
+    const space = context.measureText(text);
+
+    if (!usedSpace.some((v) => x + space.width > v[0] && x < v[1])) {
+      context.fillText(text, x, rect.bottom + h + 2);
+    }
   }
 };

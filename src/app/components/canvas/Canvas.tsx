@@ -39,7 +39,8 @@ export const Canvas: FunctionalComponent = () => {
     graph?: HTMLCanvasElement,
     time?: TimeFrame,
     analyserNode?: AnalyserNode,
-    audioContext?: BaseAudioContext
+    audioContext?: BaseAudioContext,
+    audio?: HTMLAudioElement
   ) => {
     if (!canvas.current || !context) return;
 
@@ -63,6 +64,7 @@ export const Canvas: FunctionalComponent = () => {
         context,
         margin,
         time,
+        currentTime: audio?.currentTime,
         layout: ticksLayout,
       });
     }
@@ -96,7 +98,7 @@ export const Canvas: FunctionalComponent = () => {
     renderUi(
       store.state.renderer
         ? 'Loading...'
-        : 'Record audio or select an file to analyze...'
+        : 'Activate microphone or select an file to analyze...'
     );
 
     store.state.rendererInstance?.resize(
@@ -160,7 +162,8 @@ export const Canvas: FunctionalComponent = () => {
           data.canvas,
           { start: 0, end: data.audioBuffer.duration },
           data.audioAnalyzer,
-          data.audioContext
+          data.audioContext,
+          data.audio
         );
       });
     } else {

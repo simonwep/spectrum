@@ -84,10 +84,8 @@ export const Header: FunctionalComponent = () => {
   }, [store.state.rendererInstance?.name]);
 
   useEffect(() => {
-    const instance = store.state.rendererInstance;
-
-    if (isAudioFileSpectrumRenderer(instance)) {
-      instance.setVolume(volume);
+    if (isAudioFileSpectrumRenderer(store.state.rendererInstance)) {
+      store.state.rendererInstance.setVolume(volume);
     }
   }, [volume]);
 
