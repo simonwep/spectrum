@@ -12,6 +12,7 @@ import { renderInfoText } from '@core/ui/renderInfoText';
 import { renderTimeBar, TimeBarVisuals } from '@core/ui/renderTimeBar';
 import { applyMargin, Margin } from '@core/ui/utils';
 import { useStore } from '@store';
+import { px } from '@utils/device';
 import { resolveRealCanvasSize } from '@utils/resizeAndClearCanvas';
 import { FunctionalComponent } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
@@ -19,7 +20,13 @@ import prettyBytes from 'pretty-bytes';
 import { prettyDuration } from '../../../utils/prettyDuration';
 import styles from './Canvas.module.scss';
 
-const margin: Margin = { top: 35, right: 100, bottom: 35, left: 65 };
+const margin: Margin = {
+  top: px(35),
+  right: px(100),
+  bottom: px(35),
+  left: px(65),
+};
+
 const ticksLayout: TimeBarVisuals = {
   tickMinDistance: 50,
   tickThickness: 1,

@@ -1,4 +1,5 @@
 import { prettyDuration } from '@utils/prettyDuration';
+import { SPECTRUM_UI_FONT_SIZE } from '../../constants';
 import { TimeFrame } from '../lib/renderer';
 import { applyMargin, Margin } from './utils';
 import { findFittingTicksAmount } from './utils/findFittingTicksAmount';
@@ -36,7 +37,7 @@ export const renderTimeBar = ({
   context.fillStyle = 'white';
   context.textAlign = 'center';
   context.textBaseline = 'hanging';
-  context.font = '12px monospace';
+  context.font = SPECTRUM_UI_FONT_SIZE;
 
   const usedSpace: [number, number][] = [];
   for (let i = 0; i <= ticks; i++) {

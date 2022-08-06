@@ -1,4 +1,5 @@
 import { hslToRgb } from '@utils/colors';
+import { px } from '@utils/device';
 
 const HUE_SILENCING = 270;
 const HUE_MAX = 300;
@@ -14,6 +15,8 @@ for (let i = 0; i <= 255; i++) {
   color.set(hslToRgb(hue / 360, 1, lightness), 0);
   color[3] = 255;
 }
+
+export const SPECTRUM_UI_FONT_SIZE = `${px(12)}px monospace`;
 
 export const SPECTRUM_UI_COLORS = colors;
 

@@ -1,4 +1,4 @@
-import { SPECTRUM_UI_COLORS } from '../../constants';
+import { SPECTRUM_UI_COLORS, SPECTRUM_UI_FONT_SIZE } from '../../constants';
 import { applyMargin, Margin } from './utils';
 import { findFittingTicksAmount } from './utils/findFittingTicksAmount';
 
@@ -52,7 +52,7 @@ export const renderDecibelBar = ({
   context.fillRect(x0, y0, layout.width, rect.height);
   context.textAlign = 'left';
   context.textBaseline = 'middle';
-  context.font = '12px monospace';
+  context.font = SPECTRUM_UI_FONT_SIZE;
 
   // Draw ticks for decimal bar
   const [ticks, spacing] = findFittingTicksAmount(

@@ -22,11 +22,11 @@ export const renderFrequencyBand = ({
 }: FrequencyBandOptions) => {
   const rect = applyMargin(context.canvas, margin);
   const outerBoxHeight = rect.height + 1;
+  const spectrum = sampleRate / 2 / 1000;
   const [ticks, spacing] = findFittingTicksAmount(
     layout.tickMinDistance,
     outerBoxHeight
   );
-  const spectrum = sampleRate / 2 / 1000;
 
   context.textAlign = 'right';
   context.textBaseline = 'middle';
