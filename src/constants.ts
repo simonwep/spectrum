@@ -16,7 +16,7 @@ for (let i = 0; i <= 255; i++) {
   color[3] = 255;
 }
 
-export const SPECTRUM_UI_FONT_SIZE = `${px(12)}px monospace`;
+export const SPECTRUM_UI_FONT_SIZE = `${px(10)}px monospace`;
 
 export const SPECTRUM_UI_COLORS = colors;
 
