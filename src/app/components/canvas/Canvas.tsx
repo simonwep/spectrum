@@ -47,7 +47,8 @@ export const Canvas: FunctionalComponent = () => {
     time?: TimeFrame,
     analyserNode?: AnalyserNode,
     audioContext?: BaseAudioContext,
-    audio?: HTMLAudioElement
+    audio?: HTMLAudioElement,
+    sampleRate = audioContext?.sampleRate
   ) => {
     if (!canvas.current || !context) return;
 
@@ -87,7 +88,7 @@ export const Canvas: FunctionalComponent = () => {
       context,
       margin,
       layout: frequencyBandLayout,
-      sampleRate: audioContext?.sampleRate,
+      sampleRate,
     });
 
     renderInfoText({ context, margin, text });
@@ -153,11 +154,10 @@ export const Canvas: FunctionalComponent = () => {
         const { length, duration, numberOfChannels } = data.audioBuffer;
         const { name, type } = data.audioFile;
         const { currentTime } = data.audio ?? { currentTime: 0 };
-        const sampleRate = data.audioContext.sampleRate.toLocaleString();
         const bitrate = ((length / duration) * 8) / 1000;
 
         const text =
-          `${name} (${type}, ${sampleRate} Hz, ${bitrate}kbps, ${numberOfChannels} channels)` +
+          `${name} (${type}, ~${data.sampleRate.toLocaleString()} Hz, ${bitrate}kbps, ${numberOfChannels} channels)` +
           (data.audio
             ? ` (playing - ${prettyDuration(currentTime)} / ${prettyDuration(
                 duration
@@ -170,7 +170,8 @@ export const Canvas: FunctionalComponent = () => {
           { start: 0, end: data.audioBuffer.duration },
           data.audioAnalyzer,
           data.audioContext,
-          data.audio
+          data.audio,
+          data.sampleRate
         );
       });
     } else {

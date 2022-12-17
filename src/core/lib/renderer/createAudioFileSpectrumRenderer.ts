@@ -1,3 +1,4 @@
+import { detectSampleRate } from '@utils/detectSampleRate';
 import { createAudioBuffer, createCanvas, createEventBus } from '../utils';
 
 export interface AudioFileSpectrumRendererUpdate {
@@ -7,6 +8,7 @@ export interface AudioFileSpectrumRendererUpdate {
   audioBuffer: AudioBuffer;
   audioFile: File;
   audio: HTMLAudioElement | undefined;
+  sampleRate: number;
 }
 
 export interface AudioFileSpectrumRendererEvents {
@@ -19,8 +21,16 @@ export interface AudioFileSpectrumRendererEvents {
   update: AudioFileSpectrumRendererUpdate;
 }
 
-const FREQUENCY_RANGE = 96_000;
+const DECODE_SAMPLE_RATE = 192_000; // Sampling rate
+const MIN_LOUDNESS = 14; // Range between 0 and 255
+
 const name = 'AudioFileSpectrumRenderer';
+
+const calculateFftSize = (height: number) => {
+  let fftSize = 2;
+  while (fftSize / 2 <= height) fftSize *= 2;
+  return fftSize;
+};
 
 export const createAudioFileSpectrumRenderer = (
   colors: Uint8ClampedArray[]
@@ -30,6 +40,7 @@ export const createAudioFileSpectrumRenderer = (
 
   let rendering = false;
   let playing = false;
+  let sampleRate = DECODE_SAMPLE_RATE;
   let audioContext: OfflineAudioContext | undefined;
   let audioAnalyzer: AnalyserNode | undefined;
   let audioBuffer: AudioBuffer | undefined;
@@ -37,12 +48,6 @@ export const createAudioFileSpectrumRenderer = (
   let audioFileUrl: string | undefined;
   let imageData: ImageData | undefined;
   let audio: HTMLAudioElement | undefined;
-
-  const calculateFftSize = (height: number) => {
-    let fftSize = 2;
-    while (fftSize / 2 < height) fftSize *= 2;
-    return fftSize;
-  };
 
   const update = () => {
     if (audioFile && audioContext && audioAnalyzer && audioBuffer) {
@@ -53,6 +58,7 @@ export const createAudioFileSpectrumRenderer = (
         audioAnalyzer,
         audioBuffer,
         audio,
+        sampleRate,
       });
     }
   };
@@ -72,7 +78,7 @@ export const createAudioFileSpectrumRenderer = (
 
     audioFile = file;
     audioBuffer = await createAudioBuffer(file, {
-      sampleRate: FREQUENCY_RANGE,
+      sampleRate: DECODE_SAMPLE_RATE,
     });
 
     const { width, height } = canvas;
@@ -108,13 +114,21 @@ export const createAudioFileSpectrumRenderer = (
 
     await audioContext.startRendering();
 
-    // Render spectrum
+    /**
+     * It is currently not possible to detect the sample-rate of an audio file.
+     * So instead we use the currently highest sample-rate available in all major browsers,
+     * and sample it down manually afterwards to only show the meaningful fraction of the audio-file.
+     */
+    sampleRate = detectSampleRate(frames, DECODE_SAMPLE_RATE, MIN_LOUDNESS);
+
+    // Render spectrum;
     imageData = new ImageData(width, height);
     for (let x = 0; x < width; x++) {
       const frame = frames[x];
 
       for (let y = 0; y < height; y++) {
-        const loudness = frame[y];
+        const index = Math.floor(y * (sampleRate / DECODE_SAMPLE_RATE));
+        const loudness = frame[index];
 
         if (loudness) {
           const pixelOffset = (x + (height - y - 1) * width) * 4;
@@ -189,6 +203,7 @@ export const createAudioFileSpectrumRenderer = (
     on,
     off,
     name,
+    sampleRate,
     resize,
     render,
     destroy,
