@@ -1,5 +1,7 @@
+<br/>
+
 <h3 align="center">
-    <img src="public/icons/maskable-256x256.png" alt="Logo" height="256">
+    <img src="public/images/icon-512x512.png" alt="Logo" height="256">
 </h3>
 
 <h3 align="center">
