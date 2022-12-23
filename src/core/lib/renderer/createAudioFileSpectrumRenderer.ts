@@ -1,4 +1,5 @@
 import { detectSampleRate } from '@utils/detectSampleRate';
+import { SPECTRUM_MINIMUM_LOUDNESS } from '@constants';
 import { createAudioBuffer, createCanvas, createEventBus } from '../utils';
 
 export interface AudioFileSpectrumRendererUpdate {
@@ -22,7 +23,6 @@ export interface AudioFileSpectrumRendererEvents {
 }
 
 const DECODE_SAMPLE_RATE = 192_000; // Sampling rate
-const MIN_LOUDNESS = 14; // Range between 0 and 255
 
 const name = 'AudioFileSpectrumRenderer';
 
@@ -119,7 +119,11 @@ export const createAudioFileSpectrumRenderer = (
      * So instead we use the currently highest sample-rate available in all major browsers,
      * and sample it down manually afterwards to only show the meaningful fraction of the audio-file.
      */
-    sampleRate = detectSampleRate(frames, DECODE_SAMPLE_RATE, MIN_LOUDNESS);
+    sampleRate = detectSampleRate(
+      frames,
+      DECODE_SAMPLE_RATE,
+      SPECTRUM_MINIMUM_LOUDNESS
+    );
 
     // Render spectrum;
     imageData = new ImageData(width, height);

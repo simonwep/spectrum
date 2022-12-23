@@ -17,7 +17,7 @@ import { resolveRealCanvasSize } from '@utils/resizeAndClearCanvas';
 import { FunctionalComponent } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import prettyBytes from 'pretty-bytes';
-import { prettyDuration } from '../../../utils/prettyDuration';
+import { prettyDuration } from '@utils/prettyDuration';
 import styles from './Canvas.module.scss';
 
 const margin: Margin = {
@@ -48,7 +48,7 @@ export const Canvas: FunctionalComponent = () => {
     analyserNode?: AnalyserNode,
     audioContext?: BaseAudioContext,
     audio?: HTMLAudioElement,
-    sampleRate = audioContext?.sampleRate
+    sampleRate?: number
   ) => {
     if (!canvas.current || !context) return;
 
@@ -134,23 +134,26 @@ export const Canvas: FunctionalComponent = () => {
     const instance = store.state.rendererInstance;
 
     if (isRealtimeSpectrumRenderer(instance)) {
-      instance.on('update', (data) => {
-        const sampleRateText = data.audioContext.sampleRate.toLocaleString();
+      return instance.on('update', (data) => {
         const bufferText = prettyBytes(data.bufferSize, {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         });
 
         renderUi(
-          `Recording with a sample-rate of ${sampleRateText} (Buffer: ${bufferText})`,
+          `Recording with a sample-rate of ~${data.sampleRate.toLocaleString()} (Buffer: ${bufferText})`,
           data.canvas,
           data.time,
           data.audioAnalyzer,
-          data.audioContext
+          data.audioContext,
+          undefined,
+          data.sampleRate
         );
       });
-    } else if (isAudioFileSpectrumRenderer(instance)) {
-      instance.on('update', (data) => {
+    }
+
+    if (isAudioFileSpectrumRenderer(instance)) {
+      return instance.on('update', (data) => {
         const { length, duration, numberOfChannels } = data.audioBuffer;
         const { name, type } = data.audioFile;
         const { currentTime } = data.audio ?? { currentTime: 0 };
@@ -174,9 +177,9 @@ export const Canvas: FunctionalComponent = () => {
           data.sampleRate
         );
       });
-    } else {
-      resize();
     }
+
+    resize();
   }, [store.state.rendererInstance]);
 
   return (

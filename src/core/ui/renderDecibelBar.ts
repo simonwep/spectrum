@@ -1,4 +1,4 @@
-import { SPECTRUM_UI_COLORS, SPECTRUM_UI_FONT_SIZE } from '../../constants';
+import { SPECTRUM_UI_COLORS, SPECTRUM_UI_FONT_SIZE } from '@constants';
 import { applyMargin, Margin } from './utils';
 import { findFittingTicksAmount } from './utils/findFittingTicksAmount';
 

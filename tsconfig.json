@@ -26,6 +26,7 @@
         ],
         "paths": {
             "@components/*": ["src/app/components/*"],
+            "@constants": ["src/constants.ts"],
             "@utils/*": ["src/utils/*"],
             "@core/*": ["src/core/*"],
             "@store": ["src/store/index.ts"]

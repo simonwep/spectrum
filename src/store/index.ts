@@ -5,7 +5,7 @@ import {
   RealtimeSpectrumRenderer,
 } from '@core/lib/renderer';
 import { StateUpdater, useEffect, useState } from 'preact/hooks';
-import { SPECTRUM_BACKGROUND, SPECTRUM_UI_COLORS } from '../constants';
+import { SPECTRUM_BACKGROUND, SPECTRUM_UI_COLORS } from '@constants';
 
 export interface RealtimeRenderer {
   type: 'realtime';

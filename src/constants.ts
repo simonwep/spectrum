@@ -21,3 +21,5 @@ export const SPECTRUM_UI_FONT_SIZE = `${px(10)}px monospace`;
 export const SPECTRUM_UI_COLORS = colors;
 
 export const SPECTRUM_BACKGROUND = new Uint8ClampedArray([0, 0, 0, 255]);
+
+export const SPECTRUM_MINIMUM_LOUDNESS = 14;

@@ -1,3 +1,5 @@
+import { detectSampleRate } from '@utils/detectSampleRate';
+import { SPECTRUM_MINIMUM_LOUDNESS } from '@constants';
 import {
   CancelNextFrameLoop,
   createCanvas,
@@ -16,6 +18,7 @@ export interface RealtimeSpectrumRendererUpdate {
   audioContext: AudioContext;
   audioAnalyzer: AnalyserNode;
   bufferSize: number;
+  sampleRate: number;
 }
 
 export interface RealtimeSpectrumRendererEvents {
@@ -30,7 +33,8 @@ interface Frame {
   at: number;
 }
 
-const FREQUENCY_RANGE = 96_000;
+const RECORD_SAMPLE_RATE = 192_000; // Sampling rate
+
 const name = 'RealtimeSpectrumRenderer';
 
 export const createRealtimeSpectrumRenderer = (
@@ -44,6 +48,7 @@ export const createRealtimeSpectrumRenderer = (
   let audioContext: AudioContext | undefined;
   let audioAnalyzer: AnalyserNode | undefined;
   let stopRendering: CancelNextFrameLoop | undefined;
+  let sampleRate = RECORD_SAMPLE_RATE;
 
   const analyzerOptions: Required<
     Pick<
@@ -65,7 +70,14 @@ export const createRealtimeSpectrumRenderer = (
 
   const update = () => {
     if (audioContext && audioAnalyzer) {
-      emit('update', { canvas, time, audioContext, audioAnalyzer, bufferSize });
+      emit('update', {
+        canvas,
+        time,
+        audioContext,
+        sampleRate,
+        audioAnalyzer,
+        bufferSize,
+      });
     }
   };
 
@@ -83,16 +95,12 @@ export const createRealtimeSpectrumRenderer = (
     for (let i = 0; i < spectrum.data.length; i += 4) {
       const row = height - Math.floor(i / 4 / spectrum.width);
       const col = (i / 4) % spectrum.width;
-      const frame = view[col];
-      const slice = frame.buffer.length / spectrum.height;
-      const loudness = frame.buffer[Math.floor(row * slice)];
 
-      if (loudness) {
-        const color = colors[loudness];
-        spectrum.data.set(color, i);
-      } else {
-        spectrum.data.set(background, i);
-      }
+      const frame = view[col];
+      const index = Math.floor(row * (sampleRate / RECORD_SAMPLE_RATE));
+      const loudness = frame.buffer[index];
+
+      spectrum.data.set(loudness ? colors[loudness] : background, i);
     }
 
     offset = Math.min(view.length - 1);
@@ -128,7 +136,7 @@ export const createRealtimeSpectrumRenderer = (
     // Create context and analyzer node
     await audioContext?.close();
     audioContext = new AudioContext({
-      sampleRate: FREQUENCY_RANGE,
+      sampleRate: RECORD_SAMPLE_RATE,
     });
 
     // Connect analyzer node
@@ -143,22 +151,26 @@ export const createRealtimeSpectrumRenderer = (
 
       const buffer = new Uint8Array(analyzer.frequencyBinCount);
       const spectrum = new ImageData(1, height);
-      const slice = buffer.length / height;
       const at = Math.ceil(performance.now() - start);
 
       Object.assign(analyzer, analyzerOptions);
       analyzer.getByteFrequencyData(buffer);
 
+      sampleRate = Math.max(
+        detectSampleRate(
+          [buffer],
+          RECORD_SAMPLE_RATE,
+          SPECTRUM_MINIMUM_LOUDNESS
+        ),
+        frames.length ? sampleRate : 0
+      );
+
       for (let y = 0; y < height; y++) {
-        const loudness = buffer[Math.floor(y * slice)];
+        const index = Math.floor(y * (sampleRate / RECORD_SAMPLE_RATE));
+        const loudness = buffer[index];
         const offset = (height - y - 1) * 4;
 
-        if (loudness) {
-          const color = colors[loudness];
-          spectrum.data.set(color, offset);
-        } else {
-          spectrum.data.set(background, offset);
-        }
+        spectrum.data.set(loudness ? colors[loudness] : background, offset);
       }
 
       const averageTimePerFrame = frames.length
@@ -189,6 +201,7 @@ export const createRealtimeSpectrumRenderer = (
     on,
     off,
     name,
+    sampleRate,
     analyzerOptions,
     resize,
     start,

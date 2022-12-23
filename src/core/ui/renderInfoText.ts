@@ -1,5 +1,5 @@
 import { px } from '@utils/device';
-import { SPECTRUM_UI_FONT_SIZE } from '../../constants';
+import { SPECTRUM_UI_FONT_SIZE } from '@constants';
 import { Margin } from './utils';
 
 export interface InfoTextOptions {
