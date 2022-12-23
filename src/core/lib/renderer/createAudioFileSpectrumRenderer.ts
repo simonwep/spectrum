@@ -1,6 +1,11 @@
 import { detectSampleRate } from '@utils/detectSampleRate';
 import { constants } from '@constants';
-import { createAudioBuffer, createCanvas, createEventBus } from '../utils';
+import {
+  createAudioBuffer,
+  createCanvas,
+  createEventBus,
+  nextNumberPowerOf2,
+} from '../utils';
 
 export interface AudioFileSpectrumRendererUpdate {
   canvas: HTMLCanvasElement;
@@ -22,15 +27,7 @@ export interface AudioFileSpectrumRendererEvents {
   update: AudioFileSpectrumRendererUpdate;
 }
 
-const DECODE_SAMPLE_RATE = 192_000; // Sampling rate
-
 const name = 'AudioFileSpectrumRenderer';
-
-const calculateFftSize = (height: number) => {
-  let fftSize = 2;
-  while (fftSize / 2 <= height) fftSize *= 2;
-  return fftSize;
-};
 
 export const createAudioFileSpectrumRenderer = (
   colors: Uint8ClampedArray[]
@@ -40,7 +37,7 @@ export const createAudioFileSpectrumRenderer = (
 
   let rendering = false;
   let playing = false;
-  let sampleRate = DECODE_SAMPLE_RATE;
+  let sampleRate: number = constants.RENDERER_BASE_SAMPLE_RATE;
   let audioContext: OfflineAudioContext | undefined;
   let audioAnalyzer: AnalyserNode | undefined;
   let audioBuffer: AudioBuffer | undefined;
@@ -78,7 +75,7 @@ export const createAudioFileSpectrumRenderer = (
 
     audioFile = file;
     audioBuffer = await createAudioBuffer(file, {
-      sampleRate: DECODE_SAMPLE_RATE,
+      sampleRate: constants.RENDERER_BASE_SAMPLE_RATE,
     });
 
     const { width, height } = canvas;
@@ -88,10 +85,10 @@ export const createAudioFileSpectrumRenderer = (
     // Create analyzer node
     audioAnalyzer = audioContext.createAnalyser();
     audioAnalyzer.connect(audioContext.destination);
-    audioAnalyzer.fftSize = calculateFftSize(height);
+    audioAnalyzer.fftSize = nextNumberPowerOf2(height);
     audioAnalyzer.smoothingTimeConstant = 0;
-    audioAnalyzer.minDecibels = -120;
-    audioAnalyzer.maxDecibels = -20;
+    audioAnalyzer.minDecibels = constants.RENDERER_MIN_DECIBELS;
+    audioAnalyzer.maxDecibels = constants.RENDERER_MAX_DECIBELS;
 
     // Render all frames
     const frameSize = audioBuffer.duration / frames.length;
@@ -121,8 +118,8 @@ export const createAudioFileSpectrumRenderer = (
      */
     sampleRate = detectSampleRate(
       frames,
-      DECODE_SAMPLE_RATE,
-      constants.SPECTRUM_MINIMUM_LOUDNESS
+      constants.RENDERER_BASE_SAMPLE_RATE,
+      constants.RENDERER_MIN_VISIBLE_LOUDNESS
     );
 
     // Render spectrum;
@@ -131,7 +128,9 @@ export const createAudioFileSpectrumRenderer = (
       const frame = frames[x];
 
       for (let y = 0; y < height; y++) {
-        const index = Math.floor(y * (sampleRate / DECODE_SAMPLE_RATE));
+        const index = Math.floor(
+          y * (sampleRate / constants.RENDERER_BASE_SAMPLE_RATE)
+        );
         const loudness = frame[index];
 
         if (loudness) {
