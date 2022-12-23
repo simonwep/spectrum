@@ -5,7 +5,7 @@ import {
   RealtimeSpectrumRenderer,
 } from '@core/lib/renderer';
 import { StateUpdater, useEffect, useState } from 'preact/hooks';
-import { SPECTRUM_BACKGROUND, SPECTRUM_UI_COLORS } from '@constants';
+import { constants } from '@constants';
 
 export interface RealtimeRenderer {
   type: 'realtime';
@@ -41,14 +41,17 @@ const setState = (next: State) => {
 const createInstance = (type: RenderType): RendererInstance => {
   switch (type?.type) {
     case 'file': {
-      const renderer = createAudioFileSpectrumRenderer(SPECTRUM_UI_COLORS);
+      const renderer = createAudioFileSpectrumRenderer(
+        constants.SPECTRUM_UI_COLORS
+      );
+
       requestAnimationFrame(() => void renderer.render(type.file));
       return renderer;
     }
     case 'realtime': {
       const renderer = createRealtimeSpectrumRenderer(
-        SPECTRUM_UI_COLORS,
-        SPECTRUM_BACKGROUND
+        constants.SPECTRUM_UI_COLORS,
+        constants.SPECTRUM_BACKGROUND
       );
       void renderer.start();
       return renderer;

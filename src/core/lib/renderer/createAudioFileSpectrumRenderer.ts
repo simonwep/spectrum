@@ -1,5 +1,5 @@
 import { detectSampleRate } from '@utils/detectSampleRate';
-import { SPECTRUM_MINIMUM_LOUDNESS } from '@constants';
+import { constants } from '@constants';
 import { createAudioBuffer, createCanvas, createEventBus } from '../utils';
 
 export interface AudioFileSpectrumRendererUpdate {
@@ -122,7 +122,7 @@ export const createAudioFileSpectrumRenderer = (
     sampleRate = detectSampleRate(
       frames,
       DECODE_SAMPLE_RATE,
-      SPECTRUM_MINIMUM_LOUDNESS
+      constants.SPECTRUM_MINIMUM_LOUDNESS
     );
 
     // Render spectrum;

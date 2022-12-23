@@ -1,5 +1,5 @@
 import { px } from '@utils/device';
-import { SPECTRUM_UI_FONT_SIZE } from '@constants';
+import { constants } from '@constants';
 import { Margin } from './utils';
 
 export interface InfoTextOptions {
@@ -16,6 +16,6 @@ export const renderInfoText = ({
   context.fillStyle = 'white';
   context.textAlign = 'left';
   context.textBaseline = 'bottom';
-  context.font = SPECTRUM_UI_FONT_SIZE;
+  context.font = constants.SPECTRUM_UI_FONT_SIZE;
   context.fillText(text, margin.left, margin.top - px(8));
 };

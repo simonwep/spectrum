@@ -113,7 +113,7 @@ export const Header: FunctionalComponent = () => {
             <Icon icon={playing ? 'pause' : 'play'} />
           </button>
           <button onClick={rewind}>
-            <Icon icon="reset" />
+            <Icon icon="rewind" />
           </button>
           <Slider value={volume} onChange={setVolume} />
         </>

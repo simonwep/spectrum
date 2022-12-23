@@ -1,5 +1,5 @@
 import { detectSampleRate } from '@utils/detectSampleRate';
-import { SPECTRUM_MINIMUM_LOUDNESS } from '@constants';
+import { constants } from '@constants';
 import {
   CancelNextFrameLoop,
   createCanvas,
@@ -160,7 +160,7 @@ export const createRealtimeSpectrumRenderer = (
         detectSampleRate(
           [buffer],
           RECORD_SAMPLE_RATE,
-          SPECTRUM_MINIMUM_LOUDNESS
+          constants.SPECTRUM_MINIMUM_LOUDNESS
         ),
         frames.length ? sampleRate : 0
       );
