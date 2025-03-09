@@ -1,8 +1,5 @@
 import { Slider } from '@components/slider/Slider';
-import {
-  isAudioFileSpectrumRenderer,
-  isRealtimeSpectrumRenderer,
-} from '@core/lib/renderer';
+import { isAudioFileSpectrumRenderer, isRealtimeSpectrumRenderer } from '@core/lib/renderer';
 import { useStore } from '@store';
 import { selectFile } from '@utils/selectFile';
 import { FunctionalComponent } from 'preact';
@@ -24,7 +21,7 @@ export const Header: FunctionalComponent = () => {
   const openFile = () => {
     selectFile({
       multiple: false,
-      accept: 'audio/*',
+      accept: 'audio/*'
     }).then((file) => {
       void store.changeRenderer({ file, type: 'file' });
     });
@@ -102,9 +99,7 @@ export const Header: FunctionalComponent = () => {
       )}
 
       <button onClick={openFile}>
-        <Icon
-          icon={store.state.renderer?.type === 'file' ? 'file-music' : 'file'}
-        />
+        <Icon icon={store.state.renderer?.type === 'file' ? 'file-music' : 'file'} />
       </button>
 
       {store.state.renderer?.type === 'file' && !rendering && (
@@ -119,10 +114,7 @@ export const Header: FunctionalComponent = () => {
         </>
       )}
 
-      <a
-        href="https://github.com/Simonwep/spectrum"
-        className={styles.gitHubLink}
-      >
+      <a href="https://github.com/Simonwep/spectrum" className={styles.gitHubLink}>
         <Icon icon="github" />
       </a>
     </div>

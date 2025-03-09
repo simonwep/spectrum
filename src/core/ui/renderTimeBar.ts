@@ -18,20 +18,11 @@ export interface TimeBarOptions {
   currentTime?: number;
 }
 
-export const renderTimeBar = ({
-  context,
-  time,
-  layout,
-  margin,
-  currentTime,
-}: TimeBarOptions) => {
+export const renderTimeBar = ({ context, time, layout, margin, currentTime }: TimeBarOptions) => {
   const rect = applyMargin(context.canvas, margin);
   const duration = time.end - time.start;
   const outerBoxWidth = rect.width + 1;
-  const [ticks, spacing] = findFittingTicksAmount(
-    layout.tickMinDistance * 2,
-    outerBoxWidth
-  );
+  const [ticks, spacing] = findFittingTicksAmount(layout.tickMinDistance * 2, outerBoxWidth);
 
   context.strokeStyle = 'white';
   context.fillStyle = 'white';

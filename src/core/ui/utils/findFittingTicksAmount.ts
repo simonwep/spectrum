@@ -4,10 +4,7 @@
  * @param spaceAvailable Total space available.
  * @return [number, number] Ticks and spacing.
  */
-export const findFittingTicksAmount = (
-  min: number,
-  spaceAvailable: number
-): [number, number] => {
+export const findFittingTicksAmount = (min: number, spaceAvailable: number): [number, number] => {
   let ticks = 2;
 
   for (;;) {

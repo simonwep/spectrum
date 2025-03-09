@@ -1,8 +1,4 @@
-export const detectSampleRate = (
-  frames: Uint8Array[],
-  baseSampleRate: number,
-  minLoudness: number
-) => {
+export const detectSampleRate = (frames: Uint8Array[], baseSampleRate: number, minLoudness: number) => {
   let highestFrequency = -1;
 
   for (let i = 0; i < frames.length; i++) {

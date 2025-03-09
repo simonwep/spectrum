@@ -1,13 +1,6 @@
-import {
-  isAudioFileSpectrumRenderer,
-  isRealtimeSpectrumRenderer,
-  TimeFrame,
-} from '@core/lib/renderer';
+import { isAudioFileSpectrumRenderer, isRealtimeSpectrumRenderer, TimeFrame } from '@core/lib/renderer';
 import { DecibelBarVisuals, renderDecibelBar } from '@core/ui/renderDecibelBar';
-import {
-  FrequencyBandVisuals,
-  renderFrequencyBand,
-} from '@core/ui/renderFrequencyBand';
+import { FrequencyBandVisuals, renderFrequencyBand } from '@core/ui/renderFrequencyBand';
 import { renderInfoText } from '@core/ui/renderInfoText';
 import { renderTimeBar, TimeBarVisuals } from '@core/ui/renderTimeBar';
 import { applyMargin, Margin } from '@core/ui/utils';
@@ -24,13 +17,13 @@ const margin: Margin = {
   top: px(35),
   right: px(100),
   bottom: px(35),
-  left: px(65),
+  left: px(65)
 };
 
 const ticksLayout: TimeBarVisuals = {
   tickMinDistance: 50,
   tickThickness: 1,
-  tickLength: 10,
+  tickLength: 10
 };
 
 const decibelBarLayout: DecibelBarVisuals = { ...ticksLayout, width: 10 };
@@ -60,12 +53,7 @@ export const Canvas: FunctionalComponent = () => {
     context.fillStyle = 'white';
     context.strokeStyle = 'white';
 
-    context.strokeRect(
-      rect.left - 0.5,
-      rect.top - 0.5,
-      rect.width + 1,
-      rect.height + 1
-    );
+    context.strokeRect(rect.left - 0.5, rect.top - 0.5, rect.width + 1, rect.height + 1);
 
     if (time) {
       renderTimeBar({
@@ -73,7 +61,7 @@ export const Canvas: FunctionalComponent = () => {
         margin,
         time,
         currentTime: audio?.currentTime,
-        layout: ticksLayout,
+        layout: ticksLayout
       });
     }
 
@@ -81,14 +69,14 @@ export const Canvas: FunctionalComponent = () => {
       context,
       margin,
       decibelRange: analyserNode,
-      layout: decibelBarLayout,
+      layout: decibelBarLayout
     });
 
     renderFrequencyBand({
       context,
       margin,
       layout: frequencyBandLayout,
-      sampleRate,
+      sampleRate
     });
 
     renderInfoText({ context, margin, text });
@@ -103,16 +91,9 @@ export const Canvas: FunctionalComponent = () => {
     canvas.current.width = width;
     canvas.current.height = height;
 
-    renderUi(
-      store.state.renderer
-        ? 'Loading...'
-        : 'Activate microphone or select an file to analyze...'
-    );
+    renderUi(store.state.renderer ? 'Loading...' : 'Activate microphone or select an file to analyze...');
 
-    store.state.rendererInstance?.resize(
-      width - left - right,
-      height - top - bottom
-    );
+    store.state.rendererInstance?.resize(width - left - right, height - top - bottom);
   };
 
   useEffect(() => {
@@ -124,7 +105,7 @@ export const Canvas: FunctionalComponent = () => {
   useEffect(() => {
     setContext(
       canvas.current?.getContext('2d', {
-        alpha: false,
+        alpha: false
       }) as CanvasRenderingContext2D
     );
   }, [canvas]);
@@ -137,7 +118,7 @@ export const Canvas: FunctionalComponent = () => {
       return instance.on('update', (data) => {
         const bufferText = prettyBytes(data.bufferSize, {
           minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
+          maximumFractionDigits: 2
         });
 
         renderUi(
@@ -161,11 +142,7 @@ export const Canvas: FunctionalComponent = () => {
 
         const text =
           `${name} (${type}, ~${data.sampleRate.toLocaleString()} Hz, ${bitrate}kbps, ${numberOfChannels} channels)` +
-          (data.audio
-            ? ` (playing - ${prettyDuration(currentTime)} / ${prettyDuration(
-                duration
-              )})`
-            : '');
+          (data.audio ? ` (playing - ${prettyDuration(currentTime)} / ${prettyDuration(duration)})` : '');
 
         renderUi(
           text,

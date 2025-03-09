@@ -1,35 +1,40 @@
 {
-    "name": "spectrum",
-    "private": true,
-    "version": "0.0.0",
-    "author": "Simon Reinisch <trash@reinisch.io>",
-    "scripts": {
-        "dev": "vite",
-        "build": "tsc && vite build",
-        "preview": "vite preview",
-        "lint": "eslint **/*.{ts,tsx} --cache",
-        "lint:fix": "npm run lint -- --fix",
-        "test:ci": "npm run lint:fix && npm run build"
-    },
-    "dependencies": {
-        "preact": "^10.11.3",
-        "pretty-bytes": "^6.0.0"
-    },
-    "devDependencies": {
-        "@preact/preset-vite": "^2.5.0",
-        "@types/node": "^18.11.17",
-        "@typescript-eslint/eslint-plugin": "^5.47.0",
-        "@typescript-eslint/parser": "^5.47.0",
-        "eslint": "^8.30.0",
-        "eslint-config-prettier": "^8.5.0",
-        "eslint-plugin-prettier": "^4.2.1",
-        "eslint-plugin-react": "^7.31.11",
-        "prettier": "^2.8.1",
-        "sass": "^1.57.1",
-        "typescript": "^4.9.4",
-        "vite": "^4.0.3",
-        "vite-plugin-optimize-css-modules": "^1.0.4",
-        "vite-plugin-pwa": "^0.14.0",
-        "vite-tsconfig-paths": "^4.0.3"
-    }
+  "name": "spectrum",
+  "private": true,
+  "version": "0.0.0",
+  "author": "Simon Reinisch <trash@reinisch.io>",
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint 'src/**/*.{ts,tsx}' --cache",
+    "lint:fix": "pnpm lint --fix",
+    "test:ci": "pnpm lint:fix && npm build"
+  },
+  "dependencies": {
+    "preact": "10.26.4",
+    "pretty-bytes": "6.1.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.22.0",
+    "@preact/preset-vite": "2.10.1",
+    "@types/node": "22.13.10",
+    "@typescript-eslint/eslint-plugin": "8.26.0",
+    "@typescript-eslint/parser": "8.26.0",
+    "eslint": "9.22.0",
+    "eslint-config-prettier": "10.1.1",
+    "eslint-plugin-prettier": "5.2.3",
+    "eslint-plugin-react": "7.37.4",
+    "globals": "16.0.0",
+    "prettier": "3.5.3",
+    "sass": "1.85.1",
+    "typescript": "5.8.2",
+    "typescript-eslint": "8.26.0",
+    "vite": "6.2.1",
+    "vite-plugin-optimize-css-modules": "1.2.0",
+    "vite-plugin-pwa": "0.21.1",
+    "vite-tsconfig-paths": "5.1.4",
+    "workbox-window": "7.3.0"
+  }
 }

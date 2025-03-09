@@ -6,6 +6,4 @@ interface Props {
   icon: keyof typeof icons;
 }
 
-export const Icon: FunctionalComponent<Props> = (props) => (
-  <span className={styles.icon}>{icons[props.icon]}</span>
-);
+export const Icon: FunctionalComponent<Props> = (props) => <span className={styles.icon}>{icons[props.icon]}</span>;

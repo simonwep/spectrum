@@ -7,11 +7,7 @@ const hueToRgb = (p: number, q: number, t: number): number => {
   return p;
 };
 
-export const hslToRgb = (
-  h: number,
-  s: number,
-  l: number
-): [number, number, number] => {
+export const hslToRgb = (h: number, s: number, l: number): [number, number, number] => {
   let r, g, b;
 
   if (s === 0) {

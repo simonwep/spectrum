@@ -23,15 +23,10 @@ export interface DecibelBarOptions {
 
 const DEFAULT_RANGE: DecibelBarRange = {
   minDecibels: -120,
-  maxDecibels: -20,
+  maxDecibels: -20
 };
 
-export const renderDecibelBar = ({
-  context,
-  margin,
-  layout,
-  decibelRange = DEFAULT_RANGE,
-}: DecibelBarOptions) => {
+export const renderDecibelBar = ({ context, margin, layout, decibelRange = DEFAULT_RANGE }: DecibelBarOptions) => {
   const rect = applyMargin(context.canvas, margin);
 
   const x0 = rect.right + 10;
@@ -53,17 +48,11 @@ export const renderDecibelBar = ({
   context.font = constants.SPECTRUM_UI_FONT_SIZE;
 
   // Draw ticks for decimal bar
-  const [ticks, spacing] = findFittingTicksAmount(
-    layout.tickMinDistance,
-    rect.height
-  );
-  const decibelsDifference =
-    decibelRange.minDecibels - decibelRange.maxDecibels;
+  const [ticks, spacing] = findFittingTicksAmount(layout.tickMinDistance, rect.height);
+  const decibelsDifference = decibelRange.minDecibels - decibelRange.maxDecibels;
   for (let i = 0; i <= ticks; i++) {
     const y = y0 + i * spacing;
-    const text = `${Math.floor(
-      (i / ticks) * decibelsDifference + decibelRange.maxDecibels
-    )} dB`;
+    const text = `${Math.floor((i / ticks) * decibelsDifference + decibelRange.maxDecibels)} dB`;
 
     // Tick
     context.fillStyle = decibelGradient;

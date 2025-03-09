@@ -8,11 +8,7 @@ export interface InfoTextOptions {
   text: string;
 }
 
-export const renderInfoText = ({
-  context,
-  margin,
-  text,
-}: InfoTextOptions): void => {
+export const renderInfoText = ({ context, margin, text }: InfoTextOptions): void => {
   context.fillStyle = 'white';
   context.textAlign = 'left';
   context.textBaseline = 'bottom';

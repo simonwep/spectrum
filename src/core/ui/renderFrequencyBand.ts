@@ -14,19 +14,11 @@ export interface FrequencyBandOptions {
   sampleRate?: number;
 }
 
-export const renderFrequencyBand = ({
-  context,
-  margin,
-  layout,
-  sampleRate = 96_000,
-}: FrequencyBandOptions) => {
+export const renderFrequencyBand = ({ context, margin, layout, sampleRate = 96_000 }: FrequencyBandOptions) => {
   const rect = applyMargin(context.canvas, margin);
   const outerBoxHeight = rect.height + 1;
   const spectrum = sampleRate / 2 / 1000;
-  const [ticks, spacing] = findFittingTicksAmount(
-    layout.tickMinDistance,
-    outerBoxHeight
-  );
+  const [ticks, spacing] = findFittingTicksAmount(layout.tickMinDistance, outerBoxHeight);
 
   context.textAlign = 'right';
   context.textBaseline = 'middle';
@@ -36,12 +28,7 @@ export const renderFrequencyBand = ({
     const text = `${Math.floor(((ticks - i) / ticks) * spectrum)} kHz`;
 
     // Tick
-    context.fillRect(
-      rect.left - layout.tickLength,
-      y,
-      layout.tickLength,
-      layout.tickThickness
-    );
+    context.fillRect(rect.left - layout.tickLength, y, layout.tickLength, layout.tickThickness);
     context.fillText(text, rect.left - layout.tickLength - 2, y + 1);
   }
 };

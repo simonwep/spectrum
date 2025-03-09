@@ -33,12 +33,5 @@ export const Slider: FunctionalComponent<Props> = (props) => {
     window.removeEventListener('pointerleave', pointerUp);
   };
 
-  return (
-    <div
-      ref={slider}
-      className={styles.slider}
-      onPointerDown={pointerDown}
-      style={{ '--value': props.value }}
-    />
-  );
+  return <div ref={slider} className={styles.slider} onPointerDown={pointerDown} style={{ '--value': props.value }} />;
 };

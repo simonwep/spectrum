@@ -9,8 +9,7 @@ for (let i = 0; i <= 255; i++) {
   const hue = (i / 255) * HUE_MAX;
 
   // Towards the end it should just get dark
-  const lightness =
-    hue > HUE_SILENCING ? 0.5 * ((300 - hue) / (HUE_MAX - HUE_SILENCING)) : 0.5;
+  const lightness = hue > HUE_SILENCING ? 0.5 * ((300 - hue) / (HUE_MAX - HUE_SILENCING)) : 0.5;
 
   color.set(hslToRgb(hue / 360, 1, lightness), 0);
   color[3] = 255;
@@ -24,5 +23,5 @@ export const constants = {
   RENDERER_BASE_SAMPLE_RATE: 192_000,
   RENDERER_MIN_VISIBLE_LOUDNESS: 14,
   RENDERER_MIN_DECIBELS: -120,
-  RENDERER_MAX_DECIBELS: -20,
+  RENDERER_MAX_DECIBELS: -20
 } as const;

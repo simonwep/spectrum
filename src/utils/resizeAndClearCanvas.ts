@@ -3,10 +3,7 @@ interface Size {
   width: number;
 }
 
-export const resolveRealCanvasSize = (
-  canvas: HTMLCanvasElement,
-  ratio = devicePixelRatio
-): Size => {
+export const resolveRealCanvasSize = (canvas: HTMLCanvasElement, ratio = devicePixelRatio): Size => {
   canvas.width = 0;
   canvas.height = 0;
   const rect = canvas.getBoundingClientRect();

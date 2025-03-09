@@ -1,12 +1,6 @@
 import { detectSampleRate } from '@utils/detectSampleRate';
 import { constants } from '@constants';
-import {
-  CancelNextFrameLoop,
-  createCanvas,
-  createEventBus,
-  eachFrame,
-  nextNumberPowerOf2,
-} from '../utils';
+import { CancelNextFrameLoop, createCanvas, createEventBus, eachFrame, nextNumberPowerOf2 } from '../utils';
 
 export interface TimeFrame {
   start: number;
@@ -36,10 +30,7 @@ interface Frame {
 
 const name = 'RealtimeSpectrumRenderer';
 
-export const createRealtimeSpectrumRenderer = (
-  colors: Uint8ClampedArray[],
-  background: Uint8ClampedArray
-) => {
+export const createRealtimeSpectrumRenderer = (colors: Uint8ClampedArray[], background: Uint8ClampedArray) => {
   const [canvas, context] = createCanvas();
   const { on, off, emit } = createEventBus<RealtimeSpectrumRendererEvents>();
 
@@ -64,7 +55,7 @@ export const createRealtimeSpectrumRenderer = (
         audioContext,
         sampleRate,
         audioAnalyzer,
-        bufferSize,
+        bufferSize
       });
     }
   };
@@ -82,9 +73,7 @@ export const createRealtimeSpectrumRenderer = (
       const col = (i / 4) % spectrum.width;
 
       const frame = view[col];
-      const index = Math.floor(
-        row * (sampleRate / constants.RENDERER_BASE_SAMPLE_RATE)
-      );
+      const index = Math.floor(row * (sampleRate / constants.RENDERER_BASE_SAMPLE_RATE));
       const loudness = frame.buffer[index];
 
       spectrum.data.set(loudness ? colors[loudness] : background, i);
@@ -123,13 +112,13 @@ export const createRealtimeSpectrumRenderer = (
 
     // Get user media and create media recorder
     const media = await navigator.mediaDevices.getUserMedia({
-      audio: { deviceId: 'default' },
+      audio: { deviceId: 'default' }
     });
 
     // Create context and analyzer node
     await audioContext?.close();
     audioContext = new AudioContext({
-      sampleRate: constants.RENDERER_BASE_SAMPLE_RATE,
+      sampleRate: constants.RENDERER_BASE_SAMPLE_RATE
     });
 
     // Connect analyzer node
@@ -154,11 +143,7 @@ export const createRealtimeSpectrumRenderer = (
       analyzer.getByteFrequencyData(buffer);
 
       sampleRate = Math.max(
-        detectSampleRate(
-          [buffer],
-          constants.RENDERER_BASE_SAMPLE_RATE,
-          constants.RENDERER_MIN_VISIBLE_LOUDNESS
-        ),
+        detectSampleRate([buffer], constants.RENDERER_BASE_SAMPLE_RATE, constants.RENDERER_MIN_VISIBLE_LOUDNESS),
         frames.length ? sampleRate : 0
       );
 
@@ -168,9 +153,7 @@ export const createRealtimeSpectrumRenderer = (
       }
 
       for (let y = 0; y < height; y++) {
-        const index = Math.floor(
-          y * (sampleRate / constants.RENDERER_BASE_SAMPLE_RATE)
-        );
+        const index = Math.floor(y * (sampleRate / constants.RENDERER_BASE_SAMPLE_RATE));
 
         const loudness = buffer[index];
         const offset = (height - y - 1) * 4;
@@ -178,9 +161,7 @@ export const createRealtimeSpectrumRenderer = (
         spectrum.data.set(loudness ? colors[loudness] : background, offset);
       }
 
-      const averageTimePerFrame = frames.length
-        ? (frames.at(-1)?.at ?? 0) / 1000 / frames.length
-        : 0;
+      const averageTimePerFrame = frames.length ? (frames.at(-1)?.at ?? 0) / 1000 / frames.length : 0;
 
       if (offset === width - 1) {
         context.globalCompositeOperation = 'copy';
@@ -211,15 +192,12 @@ export const createRealtimeSpectrumRenderer = (
     start,
     stop,
     destroy,
-    isRecording: () => recording,
+    isRecording: () => recording
   };
 };
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export const isRealtimeSpectrumRenderer = (
-  v: any
-): v is RealtimeSpectrumRenderer => typeof v === 'object' && v?.name === name;
+export const isRealtimeSpectrumRenderer = (v: any): v is RealtimeSpectrumRenderer =>
+  typeof v === 'object' && v?.name === name;
 
-export type RealtimeSpectrumRenderer = ReturnType<
-  typeof createRealtimeSpectrumRenderer
->;
+export type RealtimeSpectrumRenderer = ReturnType<typeof createRealtimeSpectrumRenderer>;

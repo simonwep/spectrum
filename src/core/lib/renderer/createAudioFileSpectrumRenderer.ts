@@ -1,11 +1,6 @@
 import { detectSampleRate } from '@utils/detectSampleRate';
 import { constants } from '@constants';
-import {
-  createAudioBuffer,
-  createCanvas,
-  createEventBus,
-  nextNumberPowerOf2,
-} from '../utils';
+import { createAudioBuffer, createCanvas, createEventBus, nextNumberPowerOf2 } from '../utils';
 
 export interface AudioFileSpectrumRendererUpdate {
   canvas: HTMLCanvasElement;
@@ -29,9 +24,7 @@ export interface AudioFileSpectrumRendererEvents {
 
 const name = 'AudioFileSpectrumRenderer';
 
-export const createAudioFileSpectrumRenderer = (
-  colors: Uint8ClampedArray[]
-) => {
+export const createAudioFileSpectrumRenderer = (colors: Uint8ClampedArray[]) => {
   const [canvas, context] = createCanvas();
   const { on, off, emit } = createEventBus<AudioFileSpectrumRendererEvents>();
 
@@ -55,7 +48,7 @@ export const createAudioFileSpectrumRenderer = (
         audioAnalyzer,
         audioBuffer,
         audio,
-        sampleRate,
+        sampleRate
       });
     }
   };
@@ -75,7 +68,7 @@ export const createAudioFileSpectrumRenderer = (
 
     audioFile = file;
     audioBuffer = await createAudioBuffer(file, {
-      sampleRate: constants.RENDERER_BASE_SAMPLE_RATE,
+      sampleRate: constants.RENDERER_BASE_SAMPLE_RATE
     });
 
     const { width, height } = canvas;
@@ -98,9 +91,7 @@ export const createAudioFileSpectrumRenderer = (
       const frame = i * frameSize;
       audioContext.suspend(frame).then(() => {
         audioContext?.resume();
-        audioAnalyzer?.getByteFrequencyData(
-          (frames[i] = new Uint8Array(bufferSize))
-        );
+        audioAnalyzer?.getByteFrequencyData((frames[i] = new Uint8Array(bufferSize)));
       });
     }
 
@@ -116,11 +107,7 @@ export const createAudioFileSpectrumRenderer = (
      * So instead we use the currently highest sample-rate available in all major browsers,
      * and sample it down manually afterwards to only show the meaningful fraction of the audio-file.
      */
-    sampleRate = detectSampleRate(
-      frames,
-      constants.RENDERER_BASE_SAMPLE_RATE,
-      constants.RENDERER_MIN_VISIBLE_LOUDNESS
-    );
+    sampleRate = detectSampleRate(frames, constants.RENDERER_BASE_SAMPLE_RATE, constants.RENDERER_MIN_VISIBLE_LOUDNESS);
 
     // Render spectrum;
     imageData = new ImageData(width, height);
@@ -128,9 +115,7 @@ export const createAudioFileSpectrumRenderer = (
       const frame = frames[x];
 
       for (let y = 0; y < height; y++) {
-        const index = Math.floor(
-          y * (sampleRate / constants.RENDERER_BASE_SAMPLE_RATE)
-        );
+        const index = Math.floor(y * (sampleRate / constants.RENDERER_BASE_SAMPLE_RATE));
         const loudness = frame[index];
 
         if (loudness) {
@@ -215,15 +200,12 @@ export const createAudioFileSpectrumRenderer = (
     rewind,
     setVolume,
     isPlaying: () => playing,
-    isRendering: () => rendering,
+    isRendering: () => rendering
   };
 };
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export const isAudioFileSpectrumRenderer = (
-  v: any
-): v is AudioFileSpectrumRenderer => typeof v === 'object' && v?.name === name;
+export const isAudioFileSpectrumRenderer = (v: any): v is AudioFileSpectrumRenderer =>
+  typeof v === 'object' && v?.name === name;
 
-export type AudioFileSpectrumRenderer = ReturnType<
-  typeof createAudioFileSpectrumRenderer
->;
+export type AudioFileSpectrumRenderer = ReturnType<typeof createAudioFileSpectrumRenderer>;

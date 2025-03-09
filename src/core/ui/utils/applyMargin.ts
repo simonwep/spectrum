@@ -10,9 +10,6 @@ export interface Size {
   height: number;
 }
 
-export const applyMargin = (
-  { width, height }: Size,
-  { top, left, bottom, right }: Margin
-): DOMRect => {
+export const applyMargin = ({ width, height }: Size, { top, left, bottom, right }: Margin): DOMRect => {
   return new DOMRect(left, top, width - left - right, height - top - bottom);
 };
