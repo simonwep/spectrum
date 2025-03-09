@@ -114,7 +114,7 @@ export const Header: FunctionalComponent = () => {
         </>
       )}
 
-      <a href="https://github.com/Simonwep/spectrum" className={styles.gitHubLink}>
+      <a href="https://github.com/simonwep/spectrum" className={styles.gitHubLink}>
         <Icon icon="github" />
       </a>
     </div>
